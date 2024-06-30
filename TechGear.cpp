@@ -8,7 +8,11 @@
 
 using namespace std;
 
-
+struct Item {
+    string name;
+    double price;
+    int quantity;
+};
 struct User {
     string username;
     string password;
@@ -48,7 +52,6 @@ private:
             }
             file.close();
         }
-
     }
 
 public:
@@ -93,10 +96,25 @@ public:
     }
 };
 
+void user_menu(UserManager& userManager, const string& username, unordered_map<string, Item>& inventory) {
+    while (true) {
+        cout << "1. View Items" << endl;
+        cout << "2. Add to Cart" << endl;
+        cout << "3. View Cart" << endl;
+        cout << "4. View Account Details" << endl;
+        cout << "5. Purchase Items" << endl;
+        cout << "6. Log out" << endl;
+        cout << "Enter choice: ";
+        int user_choice;
+        cin >> user_choice;
+    }
+}
+
 int main() {
     UserManager userManager;
     string username;
     string password;
+    unordered_map<string, Item> inventory = {};
 
     while (true) {
         cout << "1. Register" << endl;
@@ -116,6 +134,17 @@ int main() {
                 cout << "Registration successful!" << endl;
             } else {
                 cout << "Username already exists!" << endl;
+            }
+        } else if (choice == 2) {
+            cout << "Enter Username: ";
+            cin >> username;
+            cout << "Enter Password: ";
+            cin >> password;
+            if (userManager.login_user(username, password)) {
+                cout << "Login successful!" << endl;
+                user_menu(userManager, username, inventory);
+            } else {
+                cout << "Invalid username or password!" << endl;
             }
         }
     }
