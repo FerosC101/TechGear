@@ -6,10 +6,13 @@
 #include <ctime>
 #include <cstdlib>
 
+
 using namespace std;
 
 struct Item {
     string name;
+    string category;
+    unordered_map<string, string, string>specs;
     double price;
     int quantity;
 };
@@ -33,7 +36,7 @@ private:
             string line;
             while (getline(file, line)) {
                 istringstream iss(line);
-                User user;
+                User user;  
                 iss >> user.username >> user.password >> user.money;
                 users[user.username] = user;
 
@@ -86,6 +89,7 @@ public:
     bool add_to_cart(const string& username, const string& item) {
         users[username].cart.push_back(item);
         save_users();
+        return 0;
     }
 
     void view_cart(const string& username) {
@@ -93,6 +97,26 @@ public:
         for (const auto& item : users[username].cart) {
             cout << "- " << item << "\n";
         }
+    }
+};
+
+class InventoryManager {
+private:
+    unordered_map<string, Item> inventory;
+
+public:
+    InventoryManager() {
+        load_inventory();
+    }
+
+    void load_inventory() {
+        inventory = {
+            {"laptop", {"Tite", {{"Brand", "Asus"}, {"RAM", "16GB"}, {"Processor", "Ryzen69"}}, 40000.00, 10}}
+        };
+    }
+
+    void view_inventory() {
+        
     }
 };
 
@@ -110,11 +134,23 @@ void user_menu(UserManager& userManager, const string& username, unordered_map<s
     }
 }
 
+void admin_menu(UserManager& UserManager, const string& username, unordered_map<string, Item>& inventory) {
+    while(true) {
+        cout << "1. Check Profits" << endl;
+        cout << "2. Add Items" << endl;
+        cout << "3. Edit Price" << endl;
+        cout << "4. Edit Quantity" << endl;
+        cout << "5. Exit" << endl;
+        cout << "Enter choice: ";
+        int admin_choice;
+        cin >> admin_choice;
+    }
+}
 int main() {
     UserManager userManager;
+    string inventory;
     string username;
     string password;
-    unordered_map<string, Item> inventory = {};
 
     while (true) {
         cout << "1. Register" << endl;
@@ -146,6 +182,22 @@ int main() {
             } else {
                 cout << "Invalid username or password!" << endl;
             }
+        } else if (choice == 3) {
+            cout << "Enter Admin Username: ";
+            cin >> username;
+            cout << "Enter Admin Password: ";
+            cin >> password;
+            if (userManager.admin_login(username, password)) {
+                cout << "Admin Login successful!" << endl;
+                admin_menu(userManager, username, inventory);
+            } else {
+                cout << "Invalid admin username or password!" << endl;
+            }
+        } else if (choice == 4) {
+            cout << "Exiting..." << endl;
+            break;
+        } else {
+            cout << "Invalid choice!" << endl;
         }
     }
 }
