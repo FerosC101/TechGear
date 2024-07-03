@@ -6,7 +6,6 @@
 #include <ctime>
 #include <cstdlib>
 
-
 using namespace std;
 
 struct Item {
@@ -109,9 +108,9 @@ public:
         load_inventory();
     }
 
-    void load_inventory() {
+    unordered_map<string, Item> load_inventory() {
         inventory = {
-            {"laptop", {"Tite", {{"Brand", "Asus"}, {"RAM", "16GB"}, {"Processor", "Ryzen69"}}, 40000.00, 10}}
+            {"laptop", {"Tech", "Electronics", {{"Brand", "Asus"}, {"RAM", "16GB"}, {"Processor", "Ryzen69"}}, 40000.00, 10}}
         };
     }
 
@@ -148,7 +147,8 @@ void admin_menu(UserManager& UserManager, const string& username, unordered_map<
 }
 int main() {
     UserManager userManager;
-    string inventory;
+    InventoryManager inventoryManager;
+    unordered_map<string, Item> inventory;
     string username;
     string password;
 
