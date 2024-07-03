@@ -39,6 +39,10 @@ private:
                 iss >> user.username >> user.password >> user.money;
                 users[user.username] = user;
 
+                string cart_item;
+                while (iss >> cart_item) {
+                    user.cart.push_back(cart_item);
+                }
             }
             file.close();
         }
