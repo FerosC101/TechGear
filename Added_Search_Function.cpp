@@ -518,3 +518,52 @@ int main() {
     techgear.main_menu();
     return 0;
 }
+
+/*
+#include <mysql/jdbc.h>
+#include <string>
+#include <unordered_map>
+
+using namespace std;
+
+class InventoryManager {
+private:
+    sql::Driver *driver;
+    sql::Connection *con;
+
+public:
+    InventoryManager() {
+        driver = get_driver_instance();
+        con = driver->connect("tcp://127.0.0.1:3306", "username", "password"); // Replace with your MySQL credentials
+        con->setSchema("techgear_db"); // Replace with your database name
+    }
+
+    void load_inventory_from_mysql() {
+        sql::Statement *stmt;
+        sql::ResultSet *res;
+
+        stmt = con->createStatement();
+        res = stmt->executeQuery("SELECT * FROM inventory");
+
+        while (res->next()) {
+            string name = res->getString("name");
+            string category = res->getString("category");
+            string specs = res->getString("specs"); // Assuming specs is stored as JSON or serialized format
+            double price = res->getDouble("price");
+            int quantity = res->getInt("quantity");
+            double cost_price = res->getDouble("cost_price");
+
+            // Construct Item object and add to inventory map or perform operations as needed
+        }
+
+        delete res;
+        delete stmt;
+    }
+
+    // Implement functions for add_item, edit_price, edit_quantity, etc. using MySQL queries
+
+    ~InventoryManager() {
+        delete con;
+    }
+};
+*/
