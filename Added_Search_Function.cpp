@@ -174,7 +174,7 @@ public:
     void load_inventory() {
         inventory = {
             {"Laptop", {"Laptop", "Electronics", {{"Brand", "Dell"}, {"RAM", "16GB"}, {"Storage", "512GB SSD"}}, 999.99, 10, 800.0}},
-            {"Smartphone", {"Smartphone", "Electronics", {{"Brand", "Apple"}, {"Model", "iPhone 13"}, {"Storage", "128GB"}}, 799.99, 15, 600.0}},
+            {"Smartphone", {"Smartphone", "Electronics", {{"Brand", "Apple"}, {"RAM", "16GB"}, {"Storage", "128GB"}}, 799.99, 15, 600.0}},
             {"Smartwatch", {"Smartwatch", "Wearables", {{"Brand", "Samsung"}, {"Model", "Galaxy Watch"}, {"Battery Life", "48 hours"}}, 199.99, 20, 120.0}},
             {"Tablet", {"Tablet", "Electronics", {{"Brand", "Microsoft"}, {"Model", "Surface Pro"}, {"Storage", "256GB"}}, 899.99, 8, 700.0}},
             {"Headphones", {"Headphones", "Audio", {{"Brand", "Bose"}, {"Model", "QuietComfort"}, {"Type", "Over-Ear"}}, 299.99, 25, 200.0}},
@@ -240,7 +240,7 @@ public:
         for (const auto& pair : inventory) {
             const auto& item = pair.second;
             double profit_per_item = item.price - item.cost_price;
-            total += profit_per_item * (10 - item.quantity);
+            total += profit_per_item * (10 - item.quantity); // Assuming initial quantity was 10 for all items
         }
         return total;
     }
@@ -249,7 +249,7 @@ public:
         return inventory;
     }
 
-    bool item_exists(const string& item_name) {
+    bool item_exists(const string& item_name) const {
         return inventory.find(item_name) != inventory.end();
     }
 
@@ -275,67 +275,157 @@ public:
     }
 };
 
-int main() {
-    srand(time(0));
-    InventoryManager inventoryManager;
+class Techgear {
+private:
     UserManager userManager;
+    InventoryManager inventoryManager;
 
-    int choice;
-    bool loggedIn = false;
-    string loggedInUser;
-    bool isAdmin = false;
+public:
+    void admin_menu() {
+        int choice;
+        while (true) {
+            cout << "\n--- Admin Menu ---\n";
+            cout << "1. View Inventory\n";
+            cout << "2. Add Item\n";
+            cout << "3. Edit Price\n";
+            cout << "4. Edit Quantity\n";
+            cout << "5. Calculate Total Profit\n";
+            cout << "6. Exit\n";
+            cout << "Enter your choice: ";
+            cin >> choice;
 
-    do {
-        cout << "1. Register\n2. Login\n3. Admin Login\n4. Search by Specification\n5. Exit\n";
-        cout << "Enter your choice: ";
-        cin >> choice;
+            switch (choice) {
+                case 1:
+                    inventoryManager.view_inventory();
+                    break;
+                case 2: {
+                    string name, category, spec_key, spec_value;
+                    unordered_map<string, string> specs;
+                    double price, cost_price;
+                    int quantity;
+                    cout << "Enter item name: ";
+                    cin >> name;
+                    cout << "Enter category: ";
+                    cin >> category;
+                    cout << "Enter price: ";
+                    cin >> price;
+                    cout << "Enter quantity: ";
+                    cin >> quantity;
+                    cout << "Enter cost price: ";
+                    cin >> cost_price;
 
-        switch (choice) {
-            case 1: {
-                string username, password;
-                cout << "Enter username: ";
-                cin >> username;
-                cout << "Enter password: ";
-                cin >> password;
-                if (userManager.register_user(username, password)) {
-                    cout << "Registration successful!\n";
-                } else {
-                    cout << "Username already exists!\n";
+                    cout << "Enter specs (key value pairs, 'done' to finish):\n";
+                    while (true) {
+                        cin >> spec_key;
+                        if (spec_key == "done") break;
+                        cin >> spec_value;
+                        specs[spec_key] = spec_value;
+                    }
+
+                    Item newItem(name, category, specs, price, quantity, cost_price);
+                    if (inventoryManager.add_item(newItem)) {
+                        cout << "Item added successfully.\n";
+                    } else {
+                        cout << "Item already exists.\n";
+                    }
+                    break;
                 }
-                break;
-            }
-            case 2: {
-                string username, password;
-                cout << "Enter username: ";
-                cin >> username;
-                cout << "Enter password: ";
-                cin >> password;
-                if (userManager.login_user(username, password)) {
-                    loggedIn = true;
-                    loggedInUser = username;
-                    cout << "Login successful!\n";
-                } else {
-                    cout << "Invalid username or password!\n";
+                case 3: {
+                    string item_name;
+                    double new_price;
+                    cout << "Enter item name: ";
+                    cin >> item_name;
+                    cout << "Enter new price: ";
+                    cin >> new_price;
+                    if (inventoryManager.edit_price(item_name, new_price)) {
+                        cout << "Price updated successfully.\n";
+                    } else {
+                        cout << "Item not found.\n";
+                    }
+                    break;
                 }
-                break;
-            }
-            case 3: {
-                string username, password;
-                cout << "Enter admin username: ";
-                cin >> username;
-                cout << "Enter admin password: ";
-                cin >> password;
-                if (userManager.admin_login(username, password)) {
-                    loggedIn = true;
-                    isAdmin = true;
-                    loggedInUser = username;
-                    cout << "Admin login successful!\n";
-                } else {
-                    cout << "Invalid admin credentials!\n";
+                case 4: {
+                    string item_name;
+                    int new_quantity;
+                    cout << "Enter item name: ";
+                    cin >> item_name;
+                    cout << "Enter new quantity: ";
+                    cin >> new_quantity;
+                    if (inventoryManager.edit_quantity(item_name, new_quantity)) {
+                        cout << "Quantity updated successfully.\n";
+                    } else {
+                        cout << "Item not found.\n";
+                    }
+                    break;
                 }
-                break;
+                case 5:
+                    cout << "Total profit: $" << inventoryManager.calculate_total_profit() << "\n";
+                    break;
+                case 6:
+                    return;
+                default:
+                    cout << "Invalid choice. Please try again.\n";
             }
-            case 4: {
+        }
+    }
+
+    void user_menu(const string& username) {
+        int choice;
+        while (true) {
+            cout << "\n--- User Menu ---\n";
+            cout << "1. View Inventory\n";
+            cout << "2. Add Item to Cart\n";
+            cout << "3. View Cart\n";
+            cout << "4. Checkout\n";
+            cout << "5. Search Specs\n";
+            cout << "6. View Purchase History\n";
+            cout << "7. Add Money to Account\n";
+            cout << "8. Exit\n";
+            cout << "Enter your choice: ";
+            cin >> choice;
+
+            switch (choice) {
+                case 1:
+                    inventoryManager.view_inventory();
+                    break;
+                case 2: {
+                    string item_name;
+                    cout << "Enter item name: ";
+                    cin >> item_name;
+                    if (inventoryManager.item_exists(item_name)) {
+                        userManager.add_to_cart(username, item_name);
+                        cout << "Item added to cart.\n";
+                    } else {
+                        cout << "Item not found.\n";
+                    }
+                    break;
+                }
+                case 3:
+                    userManager.view_cart(username);
+                    break;
+                case 4: {
+                    double total_cost = userManager.get_cart(username).total_cost(inventoryManager.get_inventory());
+                    double user_money = userManager.get_user_money(username);
+
+                    if (total_cost > user_money) {
+                        cout << "Insufficient funds. Total cost: $" << total_cost << ", Available balance: $" << user_money << "\n";
+                    } else {
+                        userManager.deduct_money(username, total_cost);
+                        CartNode* current = userManager.get_cart_head(username);
+                        string purchase_record = "Purchased items: ";
+                        while (current) {
+                            inventoryManager.decrease_item_quantity(current->item_name);
+                            purchase_record += current->item_name + ", ";
+                            current = current->next;
+                        }
+                        purchase_record += "Total cost: $" + to_string(total_cost);
+                        userManager.add_to_purchase_history(username, purchase_record);
+                        userManager.clear_cart(username);
+                        cout << "Checkout successful! Total cost: $" << total_cost << "\n";
+                    }
+                    break;
+                }
+                 case 5: {
                 string spec_key, spec_value;
                 cout << "Enter specification key: ";
                 cin >> spec_key;
@@ -344,13 +434,87 @@ int main() {
                 inventoryManager.search_by_spec(spec_key, spec_value);
                 break;
             }
-            case 5:
-                cout << "Exiting...\n";
-                break;
-            default:
-                cout << "Invalid choice. Please try again.\n";
+                case 6: {
+                    const vector<string>& history = userManager.get_purchase_history(username);
+                    for (const auto& record : history) {
+                        cout << record << "\n";
+                    }
+                    break;
+                }
+                case 7: {
+                    double amount;
+                    cout << "Enter amount to add: ";
+                    cin >> amount;
+                    userManager.add_money(username, amount);
+                    cout << "$" << amount << " added to your account.\n";
+                    break;
+                }
+                case 8:
+                    return;
+                default:
+                    cout << "Invalid choice. Please try again.\n";
+            }
         }
-    } while (choice != 5);
+    }
 
+    void main_menu() {
+        int choice;
+        string username, password;
+
+        while (true) {
+            cout << "\n--- Main Menu ---\n";
+            cout << "1. Admin Login\n";
+            cout << "2. User Login\n";
+            cout << "3. Register\n";
+            cout << "4. Exit\n";
+            cout << "Enter your choice: ";
+            cin >> choice;
+
+            switch (choice) {
+                case 1:
+                    cout << "Enter admin username: ";
+                    cin >> username;
+                    cout << "Enter admin password: ";
+                    cin >> password;
+                    if (userManager.admin_login(username, password)) {
+                        admin_menu();
+                    } else {
+                        cout << "Invalid admin credentials.\n";
+                    }
+                    break;
+                case 2:
+                    cout << "Enter username: ";
+                    cin >> username;
+                    cout << "Enter password: ";
+                    cin >> password;
+                    if (userManager.login_user(username, password)) {
+                        user_menu(username);
+                    } else {
+                        cout << "Invalid username or password.\n";
+                    }
+                    break;
+                case 3:
+                    cout << "Enter username: ";
+                    cin >> username;
+                    cout << "Enter password: ";
+                    cin >> password;
+                    if (userManager.register_user(username, password)) {
+                        cout << "Registration successful. You can now log in.\n";
+                    } else {
+                        cout << "Username already exists. Please choose a different username.\n";
+                    }
+                    break;
+                case 4:
+                    return;
+                default:
+                    cout << "Invalid choice. Please try again.\n";
+            }
+        }
+    }
+};
+
+int main() {
+    Techgear techgear;
+    techgear.main_menu();
     return 0;
 }
