@@ -1,0 +1,356 @@
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+#include <ctime>
+#include <cstdlib>
+
+using namespace std;
+
+struct Item {
+    string name;
+    string category;
+    unordered_map<string, string> specs;
+    double price;
+    int quantity;
+    double cost_price;
+
+    Item() : name(""), category(""), price(0.0), quantity(0), cost_price(0.0) {}
+
+    Item(string n, string c, unordered_map<string, string> s, double p, int q, double cp)
+        : name(n), category(c), specs(s), price(p), quantity(q), cost_price(cp) {}
+};
+
+struct CartNode {
+    string item_name;
+    CartNode* next;
+
+    CartNode(string name) : item_name(name), next(nullptr) {}
+};
+
+class Cart {
+private:
+    CartNode* head;
+
+public:
+    Cart() : head(nullptr) {}
+
+    ~Cart() {
+        clear_cart();
+    }
+
+    void add_item(const string& item_name) {
+        CartNode* new_node = new CartNode(item_name);
+        new_node->next = head;
+        head = new_node;
+    }
+
+    void view_cart() const {
+        CartNode* current = head;
+        while (current) {
+            cout << "- " << current->item_name << "\n";
+            current = current->next;
+        }
+    }
+
+    double total_cost(const unordered_map<string, Item>& inventory) const {
+        double total = 0.0;
+        CartNode* current = head;
+        while (current) {
+            total += inventory.at(current->item_name).price;
+            current = current->next;
+        }
+        return total;
+    }
+
+    void clear_cart() {
+        while (head) {
+            CartNode* temp = head;
+            head = head->next;
+            delete temp;
+        }
+    }
+
+    CartNode* get_head() const {
+        return head;
+    }
+};
+
+struct User {
+    string username;
+    string password;
+    Cart cart;
+    double money;
+    vector<string> purchase_history;
+
+    User() : username(""), password(""), money(0.0) {}
+};
+
+class UserManager {
+private:
+    unordered_map<string, User> users;
+    const string admin_username = "admin";
+    const string admin_password = "admin";
+
+public:
+    UserManager() {}
+
+    bool register_user(const string& username, const string& password) {
+        if (users.find(username) != users.end()) {
+            return false;
+        }
+        User newUser;
+        newUser.username = username;
+        newUser.password = password;
+        newUser.money = 0.0;
+
+        users[username] = newUser;
+        return true;
+    }
+
+    bool login_user(const string& username, const string& password) {
+        if (users.find(username) == users.end()) {
+            return false;
+        }
+        return users[username].password == password;
+    }
+
+    bool admin_login(const string& username, const string& password) {
+        return username == admin_username && password == admin_password;
+    }
+
+    bool add_to_cart(const string& username, const string& item) {
+        users[username].cart.add_item(item);
+        return true;
+    }
+
+    void view_cart(const string& username) {
+        cout << username << "'s Cart:\n";
+        users[username].cart.view_cart();
+    }
+
+    double get_user_money(const string& username) {
+        return users[username].money;
+    }
+
+    Cart& get_cart(const string& username) {
+        return users[username].cart;
+    }
+
+    CartNode* get_cart_head(const string& username) const {
+        return users.at(username).cart.get_head();
+    }
+
+    void add_money(const string& username, double amount) {
+        users[username].money += amount;
+    }
+
+    void deduct_money(const string& username, double amount) {
+        users[username].money -= amount;
+    }
+
+    void clear_cart(const string& username) {
+        users[username].cart.clear_cart();
+    }
+
+    void add_to_purchase_history(const string& username, const string& purchase_record) {
+        users[username].purchase_history.push_back(purchase_record);
+    }
+
+    const vector<string>& get_purchase_history(const string& username) const {
+        return users.at(username).purchase_history;
+    }
+};
+
+class InventoryManager {
+private:
+    unordered_map<string, Item> inventory;
+    double total_profit;
+
+public:
+    InventoryManager() : total_profit(0.0) {
+        load_inventory();
+    }
+
+    void load_inventory() {
+        inventory = {
+            {"Laptop", {"Laptop", "Electronics", {{"Brand", "Dell"}, {"RAM", "16GB"}, {"Storage", "512GB SSD"}}, 999.99, 10, 800.0}},
+            {"Smartphone", {"Smartphone", "Electronics", {{"Brand", "Apple"}, {"Model", "iPhone 13"}, {"Storage", "128GB"}}, 799.99, 15, 600.0}},
+            {"Smartwatch", {"Smartwatch", "Wearables", {{"Brand", "Samsung"}, {"Model", "Galaxy Watch"}, {"Battery Life", "48 hours"}}, 199.99, 20, 120.0}},
+            {"Tablet", {"Tablet", "Electronics", {{"Brand", "Microsoft"}, {"Model", "Surface Pro"}, {"Storage", "256GB"}}, 899.99, 8, 700.0}},
+            {"Headphones", {"Headphones", "Audio", {{"Brand", "Bose"}, {"Model", "QuietComfort"}, {"Type", "Over-Ear"}}, 299.99, 25, 200.0}},
+            {"Camera", {"Camera", "Photography", {{"Brand", "Canon"}, {"Model", "EOS R5"}, {"Resolution", "45MP"}}, 3899.99, 5, 3500.0}},
+            {"Gaming Console", {"Gaming Console", "Entertainment", {{"Brand", "Sony"}, {"Model", "PlayStation 5"}, {"Storage", "1TB"}}, 499.99, 30, 400.0}},
+            {"Router", {"Router", "Networking", {{"Brand", "Netgear"}, {"Model", "Nighthawk"}, {"Speed", "1Gbps"}}, 129.99, 40, 100.0}},
+            {"Monitor", {"Monitor", "Electronics", {{"Brand", "LG"}, {"Size", "27 inches"}, {"Resolution", "4K"}}, 349.99, 12, 250.0}},
+            {"Keyboard", {"Keyboard", "Peripherals", {{"Brand", "Logitech"}, {"Type", "Mechanical"}, {"Connectivity", "Wireless"}}, 79.99, 50, 60.0}},
+            {"Mouse", {"Mouse", "Peripherals", {{"Brand", "Razer"}, {"Type", "Gaming"}, {"DPI", "16000"}}, 59.99, 60, 40.0}},
+            {"External Hard Drive", {"External Hard Drive", "Storage", {{"Brand", "Western Digital"}, {"Capacity", "2TB"}, {"Type", "SSD"}}, 129.99, 25, 80.0}},
+            {"Printer", {"Printer", "Peripherals", {{"Brand", "HP"}, {"Model", "OfficeJet Pro"}, {"Type", "All-in-One"}}, 199.99, 18, 150.0}},
+            {"Speakers", {"Speakers", "Audio", {{"Brand", "JBL"}, {"Type", "Portable"}, {"Battery Life", "20 hours"}}, 99.99, 35, 70.0}},
+            {"Smart Home Hub", {"Smart Home Hub", "Smart Home", {{"Brand", "Google"}, {"Model", "Nest Hub"}, {"Voice Assistant", "Google Assistant"}}, 129.99, 10, 90.0}}
+        };
+    }
+
+    void view_inventory() {
+        for (const auto& pair : inventory) {
+            const auto& item = pair.second;
+            cout << "Name: " << item.name << endl;
+            cout << "Category: " << item.category << endl;
+            for (const auto& spec : item.specs) {
+                cout << spec.first << ": " << spec.second << endl;
+            }
+            cout << "Price: $" << item.price << endl;
+            cout << "Quantity: " << item.quantity << endl;
+            cout << "--------------------------------" << endl;
+        }
+    }
+
+    bool add_item(const Item& item) {
+        if (inventory.find(item.name) != inventory.end()) {
+            return false;
+        }
+        inventory[item.name] = item;
+        return true;
+    }
+
+    bool edit_price(const string& item_name, double new_price) {
+        if (inventory.find(item_name) == inventory.end()) {
+            return false;
+        }
+        inventory[item_name].price = new_price;
+        return true;
+    }
+
+    bool edit_quantity(const string& item_name, int new_quantity) {
+        if (inventory.find(item_name) == inventory.end()) {
+            return false;
+        }
+        inventory[item_name].quantity = new_quantity;
+        return true;
+    }
+
+    void decrease_item_quantity(const string& item_name) {
+        if (inventory.find(item_name) != inventory.end()) {
+            inventory[item_name].quantity--;
+        }
+    }
+
+    double calculate_total_profit() const {
+        double total = 0.0;
+        for (const auto& pair : inventory) {
+            const auto& item = pair.second;
+            double profit_per_item = item.price - item.cost_price;
+            total += profit_per_item * (10 - item.quantity);
+        }
+        return total;
+    }
+
+    const unordered_map<string, Item>& get_inventory() const {
+        return inventory;
+    }
+
+    bool item_exists(const string& item_name) {
+        return inventory.find(item_name) != inventory.end();
+    }
+
+    void search_by_spec(const string& spec_key, const string& spec_value) {
+        bool found = false;
+        for (const auto& pair : inventory) {
+            const auto& item = pair.second;
+            if (item.specs.find(spec_key) != item.specs.end() && item.specs.at(spec_key) == spec_value) {
+                cout << "Name: " << item.name << endl;
+                cout << "Category: " << item.category << endl;
+                for (const auto& spec : item.specs) {
+                    cout << spec.first << ": " << spec.second << endl;
+                }
+                cout << "Price: $" << item.price << endl;
+                cout << "Quantity: " << item.quantity << endl;
+                cout << "--------------------------------" << endl;
+                found = true;
+            }
+        }
+        if (!found) {
+            cout << "No items found with " << spec_key << " = " << spec_value << endl;
+        }
+    }
+};
+
+int main() {
+    srand(time(0));
+    InventoryManager inventoryManager;
+    UserManager userManager;
+
+    int choice;
+    bool loggedIn = false;
+    string loggedInUser;
+    bool isAdmin = false;
+
+    do {
+        cout << "1. Register\n2. Login\n3. Admin Login\n4. Search by Specification\n5. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1: {
+                string username, password;
+                cout << "Enter username: ";
+                cin >> username;
+                cout << "Enter password: ";
+                cin >> password;
+                if (userManager.register_user(username, password)) {
+                    cout << "Registration successful!\n";
+                } else {
+                    cout << "Username already exists!\n";
+                }
+                break;
+            }
+            case 2: {
+                string username, password;
+                cout << "Enter username: ";
+                cin >> username;
+                cout << "Enter password: ";
+                cin >> password;
+                if (userManager.login_user(username, password)) {
+                    loggedIn = true;
+                    loggedInUser = username;
+                    cout << "Login successful!\n";
+                } else {
+                    cout << "Invalid username or password!\n";
+                }
+                break;
+            }
+            case 3: {
+                string username, password;
+                cout << "Enter admin username: ";
+                cin >> username;
+                cout << "Enter admin password: ";
+                cin >> password;
+                if (userManager.admin_login(username, password)) {
+                    loggedIn = true;
+                    isAdmin = true;
+                    loggedInUser = username;
+                    cout << "Admin login successful!\n";
+                } else {
+                    cout << "Invalid admin credentials!\n";
+                }
+                break;
+            }
+            case 4: {
+                string spec_key, spec_value;
+                cout << "Enter specification key: ";
+                cin >> spec_key;
+                cout << "Enter specification value: ";
+                cin >> spec_value;
+                inventoryManager.search_by_spec(spec_key, spec_value);
+                break;
+            }
+            case 5:
+                cout << "Exiting...\n";
+                break;
+            default:
+                cout << "Invalid choice. Please try again.\n";
+        }
+    } while (choice != 5);
+
+    return 0;
+}
