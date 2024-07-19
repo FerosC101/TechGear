@@ -194,13 +194,13 @@ public:
     void view_inventory() {
         for (const auto& pair : inventory) {
             const auto& item = pair.second;
-            cout << "Name: " << item.name << endl;
-            cout << "Category: " << item.category << endl;
+            cout << "\t\t\tName\t\t: " << item.name << endl;
+            cout << "\t\t\tCategory\t: " << item.category << endl;
             for (const auto& spec : item.specs) {
                 cout << spec.first << ": " << spec.second << endl;
             }
-            cout << "Price: $" << item.price << endl;
-            cout << "Quantity: " << item.quantity << endl;
+            cout << "\t\t\tPrice: $" << item.price << endl;
+            cout << "\t\t\tQuantity: " << item.quantity << endl;
             cout << "--------------------------------" << endl;
         }
     }
@@ -258,19 +258,19 @@ public:
         for (const auto& pair : inventory) {
             const auto& item = pair.second;
             if (item.specs.find(spec_key) != item.specs.end() && item.specs.at(spec_key) == spec_value) {
-                cout << "Name: " << item.name << endl;
-                cout << "Category: " << item.category << endl;
+                cout << "\t\t\tName: " << item.name << endl;
+                cout << "\t\t\tCategory: " << item.category << endl;
                 for (const auto& spec : item.specs) {
                     cout << spec.first << ": " << spec.second << endl;
                 }
-                cout << "Price: $" << item.price << endl;
-                cout << "Quantity: " << item.quantity << endl;
-                cout << "--------------------------------" << endl;
+                cout << "\t\t\tPrice: $" << item.price << endl;
+                cout << "\t\t\tQuantity: " << item.quantity << endl;
+                cout << "                           =====================================================" << endl;
                 found = true;
             }
         }
         if (!found) {
-            cout << "No items found with " << spec_key << " = " << spec_value << endl;
+            cout << "\t\t\t\t\tNo items found with " << spec_key << " = " << spec_value << endl;
         }
     }
 };
@@ -284,18 +284,26 @@ public:
     void admin_menu() {
         int choice;
         while (true) {
-            cout << "\n--- Admin Menu ---\n";
-            cout << "1. View Inventory\n";
-            cout << "2. Add Item\n";
-            cout << "3. Edit Price\n";
-            cout << "4. Edit Quantity\n";
-            cout << "5. Calculate Total Profit\n";
-            cout << "6. Exit\n";
-            cout << "Enter your choice: ";
+            cout << "               ==============================================================================" << endl;
+            cout << "                                              A D M I N   M E N U" << endl;
+			cout << "               ==============================================================================" << endl << endl;
+            cout << "\t\t\t[1]\tView Inventory" << endl;
+            cout << "\t\t\t[2]\tAdd Item" << endl;
+            cout << "\t\t\t[3]\tEdit Price" << endl;
+            cout << "\t\t\t[4]\tEdit Quantity" << endl;
+            cout << "\t\t\t[5]\tCalculate Total Profit" << endl;
+            cout << "\t\t\t[6]\tExit\n" << endl;
+			cout << "                           =====================================================" << endl;
+			cout << "                                                Enter Mode: ";
             cin >> choice;
+            system("cls");
+            
 
             switch (choice) {
                 case 1:
+                    cout << "               ==============================================================================" << endl;
+                    cout << "                                               I N V E N T O R Y" << endl;
+			        cout << "               ==============================================================================" << endl << endl;
                     inventoryManager.view_inventory();
                     break;
                 case 2: {
@@ -303,18 +311,20 @@ public:
                     unordered_map<string, string> specs;
                     double price, cost_price;
                     int quantity;
-                    cout << "Enter item name: ";
+                    cout << "               ==============================================================================" << endl;
+                    cout << "                                                  A D D   I T E M S" << endl;
+			        cout << "               ==============================================================================" << endl << endl;
+                    cout << "\t\t\tEnter item name\t\t\t\t: ";
                     cin >> name;
-                    cout << "Enter category: ";
+                    cout << "\t\t\tEnter category\t\t\t\t: ";
                     cin >> category;
-                    cout << "Enter price: ";
+                    cout << "\t\t\tEnter price\t\t\t\t: ";
                     cin >> price;
-                    cout << "Enter quantity: ";
+                    cout << "\t\t\tEnter quantity\t\t\t\t: ";
                     cin >> quantity;
-                    cout << "Enter cost price: ";
+                    cout << "\t\t\tEnter cost price\t\t\t\t: ";
                     cin >> cost_price;
-
-                    cout << "Enter specs (key value pairs, 'done' to finish):\n";
+                    cout << "\t\t\tEnter specs (key value pairs, 'done' to finish)\t:\n";
                     while (true) {
                         cin >> spec_key;
                         if (spec_key == "done") break;
@@ -324,47 +334,56 @@ public:
 
                     Item newItem(name, category, specs, price, quantity, cost_price);
                     if (inventoryManager.add_item(newItem)) {
-                        cout << "Item added successfully.\n";
+                        cout << "\t\t\t\t\tItem added successfully.\n";
                     } else {
-                        cout << "Item already exists.\n";
+                        cout << "\t\t\t\t\tItem already exists.\n";
                     }
                     break;
                 }
                 case 3: {
                     string item_name;
                     double new_price;
-                    cout << "Enter item name: ";
+                    cout << "               ==============================================================================" << endl;
+                    cout << "                                                E D I T   P R I C E" << endl;
+			        cout << "               ==============================================================================" << endl << endl;
+                    cout << "\t\t\tEnter item name\t\t: ";
                     cin >> item_name;
-                    cout << "Enter new price: ";
+                    cout << "\t\t\tEnter new price\t\t: ";
                     cin >> new_price;
                     if (inventoryManager.edit_price(item_name, new_price)) {
-                        cout << "Price updated successfully.\n";
+                        cout << "\t\t\t\tPrice updated successfully.\n";
                     } else {
-                        cout << "Item not found.\n";
+                        cout << "\t\t\t\t\tItem not found.\n";
                     }
                     break;
                 }
                 case 4: {
                     string item_name;
                     int new_quantity;
-                    cout << "Enter item name: ";
+                    cout << "               ==============================================================================" << endl;
+                        cout << "                                         E D I T   Q U A N T I T Y " << endl;
+			        cout << "               ==============================================================================" << endl << endl;
+                    cout << "\t\t\tEnter item name\t\t: ";
                     cin >> item_name;
-                    cout << "Enter new quantity: ";
+                    cout << "\t\t\tEnter new quantity\t\t: ";
                     cin >> new_quantity;
                     if (inventoryManager.edit_quantity(item_name, new_quantity)) {
-                        cout << "Quantity updated successfully.\n";
+                        cout << "\t\t\t\tQuantity updated successfully.\n";
                     } else {
-                        cout << "Item not found.\n";
+                        cout << "\t\t\t\t\tItem not found.\n";
                     }
                     break;
                 }
                 case 5:
-                    cout << "Total profit: $" << inventoryManager.calculate_total_profit() << "\n";
+                    cout << "               ==============================================================================" << endl;
+                    cout << "                                                P R O F I T" << endl;
+			        cout << "               ==============================================================================" << endl << endl;
+                    cout << "\t\t\tTotal profit: $" << inventoryManager.calculate_total_profit() << "\n";
                     break;
                 case 6:
                     return;
                 default:
-                    cout << "Invalid choice. Please try again.\n";
+                    cout << "\t\t\t\t\tInvalid choice. Please try again.\n";
             }
         }
     }
@@ -372,17 +391,21 @@ public:
     void user_menu(const string& username) {
         int choice;
         while (true) {
-            cout << "\n--- User Menu ---\n";
-            cout << "1. View Inventory\n";
-            cout << "2. Add Item to Cart\n";
-            cout << "3. View Cart\n";
-            cout << "4. Checkout\n";
-            cout << "5. Search Specs\n";
-            cout << "6. View Purchase History\n";
-            cout << "7. Add Money to Account\n";
-            cout << "8. Exit\n";
-            cout << "Enter your choice: ";
+            cout << "               ==============================================================================" << endl;
+	        cout << "                                              U S E R   M E N U" << endl;
+	        cout << "               ==============================================================================" << endl << endl;
+            cout << "\t\t\t[1]\tView Inventory" << endl;
+	        cout << "\t\t\t[2]\tAdd Item to Cart" << endl;
+	        cout << "\t\t\t[3]\tView Cart" << endl;
+	        cout << "\t\t\t[4]\tCheckout" << endl;
+	        cout << "\t\t\t[5]\tSearch" << endl;
+	        cout << "\t\t\t[6]\tView Purchase History" << endl;
+	        cout << "\t\t\t[7]\tAdd Money to Account" << endl;
+	        cout << "\t\t\t[8]\tExit\n" << endl;
+	        cout << "                           =====================================================" << endl;
+	        cout << "                                                Enter Mode: ";
             cin >> choice;
+            system("cls");
 
             switch (choice) {
                 case 1:
@@ -456,58 +479,91 @@ public:
             }
         }
     }
-
+    void introduction(){
+	    cout << endl;
+	    cout << "               ==============================================================================" << endl;
+	    cout << "                                              T e c h G e a r" << endl;
+	    cout << "               ==============================================================================" << endl;
+	    cout << endl;
+	    cout << "                         ====================             ==============         " << endl;
+	    cout << "                        /====================           ================        " << endl;
+	    cout << "                        ////////=====///////          /======//////=====       " << endl;
+	    cout << "                               /=====                 /=====      /////             " << endl;
+	    cout << "                               /=====                 /=====                    " << endl;
+	    cout << "                               /=====                 /=====      =======       " << endl;
+	    cout << "                               /=====                 /=====     /=======       " << endl;
+	    cout << "                               /=====                 /======     //=====       " << endl;
+	    cout << "                               /=====          ====    /================/   ==== " << endl;
+	    cout << "                               /=====         /====     /==============/   /==== " << endl;
+	    cout << "                               //////         ////       //////////////     ////" << endl;
+	    cout << endl;
+	    cout << "               ==============================================================================" << endl;
+	    cout << "                           CREATED BY : FAJUTNAO  |  NUNEZ  |  PAULOS  |  VILLAR" << endl;
+	    cout << "               ==============================================================================" << endl << endl << endl;
+    }
     void main_menu() {
         int choice;
         string username, password;
 
         while (true) {
-            cout << "\n--- Main Menu ---\n";
-            cout << "1. Admin Login\n";
-            cout << "2. User Login\n";
-            cout << "3. Register\n";
-            cout << "4. Exit\n";
-            cout << "Enter your choice: ";
+            cout << "                           =====================================================" << endl;
+	        cout << "                                               [1] Admin Log-in " << endl;
+	        cout << "                                               [2] User Log-in " << endl;
+	        cout << "                                               [3] Register " << endl;
+	        cout << "                                               [4] Exit " << endl;
+	        cout << "                           =====================================================" << endl;
+	        cout << endl << endl;
+	        cout << "                                                Enter Mode: ";
             cin >> choice;
+            system("cls");
 
             switch (choice) {
                 case 1:
-                    cout << "Enter admin username: ";
+                    cout << "               ==============================================================================" << endl;
+	                cout << "                                          A D M I N   L O G - I N" << endl;
+	                cout << "               ==============================================================================" << endl << endl;
+                    cout << "\t\t\tEnter admin username\t\t: ";
                     cin >> username;
-                    cout << "Enter admin password: ";
+                    cout << "\t\t\tEnter admin password\t\t: ";
                     cin >> password;
                     if (userManager.admin_login(username, password)) {
                         admin_menu();
                     } else {
-                        cout << "Invalid admin credentials.\n";
+                        cout << "\t\t\t\t\tInvalid admin credentials.\n";
                     }
                     break;
                 case 2:
-                    cout << "Enter username: ";
+                    cout << "               ==============================================================================" << endl;
+	                cout << "                                          U S E R   L O G - I N" << endl;
+	                cout << "               ==============================================================================" << endl << endl;
+                    cout << "\t\t\tEnter username\t\t: ";
                     cin >> username;
-                    cout << "Enter password: ";
+                    cout << "\t\t\tEnter password\t\t: ";
                     cin >> password;
                     if (userManager.login_user(username, password)) {
                         user_menu(username);
                     } else {
-                        cout << "Invalid username or password.\n";
+                        cout << "\t\t\t\t\tInvalid username or password.\n";
                     }
                     break;
                 case 3:
-                    cout << "Enter username: ";
+                    cout << "               ==============================================================================" << endl;
+	                cout << "                                                R E G I S T E R" << endl;
+	                cout << "               ==============================================================================" << endl << endl;
+                    cout << "\t\t\tEnter username\t\t: ";
                     cin >> username;
-                    cout << "Enter password: ";
+                    cout << "\t\t\tEnter password\t\t: ";
                     cin >> password;
                     if (userManager.register_user(username, password)) {
-                        cout << "Registration successful. You can now log in.\n";
+                        cout << "\t\t\t\tRegistration successful. You can now log in.\n";
                     } else {
-                        cout << "Username already exists. Please choose a different username.\n";
+                        cout << "\t\t\t\tUsername already exists. Please choose a different username.\n";
                     }
                     break;
                 case 4:
                     return;
                 default:
-                    cout << "Invalid choice. Please try again.\n";
+                    cout << "\t\t\t\t\tInvalid choice. Please try again.\n";
             }
         }
     }
