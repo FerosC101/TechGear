@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <ctime>
 #include <cstdlib>
+#include <iomanip>
 
 using namespace std;
 
@@ -73,6 +74,12 @@ public:
     CartNode* get_head() const {
         return head;
     }
+};
+
+struct PurchaseRecord {
+    string item_name;
+    double cost;
+    string date;
 };
 
 struct User {
@@ -152,8 +159,8 @@ public:
         users[username].cart.clear_cart();
     }
 
-    void add_to_purchase_history(const string& username, const string& purchase_record) {
-        users[username].purchase_history.push_back(purchase_record);
+    void add_to_purchase_history(const string& username, const string& item_name, double cost, const string& date) {
+        users[username].purchase_history.push_back("Item: " + item_name + ", Cost: $" + to_string(cost) + ", Date: " + date);
     }
 
     const vector<string>& get_purchase_history(const string& username) const {
@@ -235,6 +242,29 @@ public:
         }
     }
 
+    bool delete_item(const string& item_name) {
+        return inventory.erase(item_name) > 0;
+    }
+
+    Item* get_item(const string& item_name) {
+        if (inventory.find(item_name) == inventory.end()) {
+            return nullptr;
+        }
+        return &inventory[item_name];
+    }
+
+    unordered_map<string, Item>& get_inventory() {
+        return inventory;
+    }
+
+    void add_profit(double amount) {
+        total_profit += amount;
+    }
+
+    double get_total_profit() const {
+        return total_profit;
+    }
+
     double calculate_total_profit() const {
         double total = 0.0;
         for (const auto& pair : inventory) {
@@ -291,8 +321,9 @@ public:
             cout << "\t\t\t[2]\tAdd Item" << endl;
             cout << "\t\t\t[3]\tEdit Price" << endl;
             cout << "\t\t\t[4]\tEdit Quantity" << endl;
-            cout << "\t\t\t[5]\tCalculate Total Profit" << endl;
-            cout << "\t\t\t[6]\tExit\n" << endl;
+            cout << "\t\t\t[5]\tDelete Item" << endl;
+            cout << "\t\t\t[6]\tCalculate Total Profit" << endl;
+            cout << "\t\t\t[7]\tExit\n" << endl;
 			cout << "                           =====================================================" << endl;
 			cout << "                                                Enter Mode: ";
             cin >> choice;
@@ -374,16 +405,117 @@ public:
                     }
                     break;
                 }
-                case 5:
+                case 5: {
+                    string item_name;
+                    cout << "Enter item name: ";
+                    cin >> item_name;
+
+                    if (inventoryManager.delete_item(item_name)) {
+                        cout << "Item deleted successfully.\n";
+                    } else {
+                        cout << "Item not found.\n";
+                    }
+                    break;
+
+                }
+                case 6:
                     cout << "               ==============================================================================" << endl;
                     cout << "                                                P R O F I T" << endl;
 			        cout << "               ==============================================================================" << endl << endl;
                     cout << "\t\t\tTotal profit: $" << inventoryManager.calculate_total_profit() << "\n";
                     break;
-                case 6:
+                case 7:
                     return;
                 default:
                     cout << "\t\t\t\t\tInvalid choice. Please try again.\n";
+            }
+        }
+    }
+
+    void view_inventory_and_add_to_cart(const string& username) {
+        while (true) {
+            cout << "\nInventory: \n";
+            inventoryManager.view_inventory();
+            cout << "\nDo you want an item to the cart? (y/n): ";
+            char add_to_cart_choice;
+            cin >> add_to_cart_choice;
+
+            if (add_to_cart_choice == 'y' || add_to_cart_choice == 'Y') {
+                string item_name;
+                cout << "Enter item name: ";
+                cin >> item_name;
+
+                if (inventoryManager.get_item(item_name)) {
+                    userManager.add_to_cart(username, item_name);
+                    cout << "Item added to Cart.\n";
+                } else {
+                    cout << "Item does not exist, Item not found.\n";
+                }
+                cout << "Do you want to purchase another item or go to the user menu? (p/u): ";
+                char next_choice;
+                cin >> next_choice;
+
+                if (next_choice == 'u' || next_choice == 'U') {
+                    break;
+                }
+            } else {
+                break;
+            }
+
+        }
+    }
+
+    void view_cart_and_checkout(const string& username) {
+        while (true) {
+            cout << "\nYour Cart:\n";
+            userManager.view_cart(username);
+            double total_cost = userManager.get_cart(username).total_cost(inventoryManager.get_inventory());
+            cout << "Total Cost: $" << total_cost << "\n";
+
+            cout << "Do you want to checkout or return to the menu? (c/m): ";
+            char checkout_choice;
+            cin >> checkout_choice;
+
+            if (checkout_choice == 'c' || checkout_choice == 'C') {
+                double user_money = userManager.get_user_money(username);
+
+                if (user_money >= total_cost) {
+                    CartNode* current = userManager.get_cart_head(username);
+                    while (current) {
+                        Item* item = inventoryManager.get_item(current->item_name);
+                        if (item) {
+                            item->quantity--;
+                            double profit = item->price - item->cost_price;
+                            inventoryManager.add_profit(profit);
+                        }
+                        current = current->next;
+                    }
+
+                    userManager.deduct_money(username, total_cost);
+                    userManager.clear_cart(username);
+
+                    // PARA SA TIJME
+                    time_t now = time(0);
+                    char* dt = ctime(&now);
+
+                    current = userManager.get_cart_head(username);
+                    while (current) {
+                        const Item* item = inventoryManager.get_item(current->item_name);
+                        if (item) {
+                            double item_cost = item->price;
+                            userManager.add_to_purchase_history(username, item->name, item_cost, string(dt));
+                        } 
+                        current = current->next;
+                    }
+                    userManager.add_to_purchase_history(username, "Total cost: $" + to_string(total_cost), total_cost, string(dt));
+                    userManager.clear_cart(username);
+                    cout << "Checkout successful. Total cost: $" << total_cost << "\n";
+                } else {
+                    cout << "Insufficient funds. Please add more money to your account.\n";
+                }
+                break;
+            } else {
+                break;
             }
         }
     }
@@ -394,77 +526,35 @@ public:
             cout << "               ==============================================================================" << endl;
 	        cout << "                                              U S E R   M E N U" << endl;
 	        cout << "               ==============================================================================" << endl << endl;
-            cout << "\t\t\t[1]\tView Inventory" << endl;
-	        cout << "\t\t\t[2]\tAdd Item to Cart" << endl;
-	        cout << "\t\t\t[3]\tView Cart" << endl;
-	        cout << "\t\t\t[4]\tCheckout" << endl;
-	        cout << "\t\t\t[5]\tSearch" << endl;
-	        cout << "\t\t\t[6]\tView Purchase History" << endl;
-	        cout << "\t\t\t[7]\tAdd Money to Account" << endl;
-	        cout << "\t\t\t[8]\tExit\n" << endl;
+            cout << "\t\t\t[1]\tShop Now" << endl;
+	        cout << "\t\t\t[2]\tView Cart" << endl;
+	        cout << "\t\t\t[3]\tSearch" << endl;
+	        cout << "\t\t\t[4]\tAdd Money to Account" << endl;
+            cout << "\t\t\t[5]\tAccount Details" << endl;
+	        cout << "\t\t\t[6]\tExit\n" << endl;
 	        cout << "                           =====================================================" << endl;
-	        cout << "                                                Enter Mode: ";
+	        cout << "                                                Enter Choice: ";
             cin >> choice;
             system("cls");
 
             switch (choice) {
                 case 1:
-                    inventoryManager.view_inventory();
+                    view_inventory_and_add_to_cart(username);
                     break;
                 case 2: {
-                    string item_name;
-                    cout << "Enter item name: ";
-                    cin >> item_name;
-                    if (inventoryManager.item_exists(item_name)) {
-                        userManager.add_to_cart(username, item_name);
-                        cout << "Item added to cart.\n";
-                    } else {
-                        cout << "Item not found.\n";
-                    }
+                    view_cart_and_checkout(username);
                     break;
                 }
-                case 3:
-                    userManager.view_cart(username);
+                case 3: {
+                    string spec_key, spec_value;
+                    cout << "Enter specification key: ";
+                    cin >> spec_key;
+                    cout << "Enter specification value: ";
+                    cin >> spec_value;
+                    inventoryManager.search_by_spec(spec_key, spec_value);
                     break;
+                }
                 case 4: {
-                    double total_cost = userManager.get_cart(username).total_cost(inventoryManager.get_inventory());
-                    double user_money = userManager.get_user_money(username);
-
-                    if (total_cost > user_money) {
-                        cout << "Insufficient funds. Total cost: $" << total_cost << ", Available balance: $" << user_money << "\n";
-                    } else {
-                        userManager.deduct_money(username, total_cost);
-                        CartNode* current = userManager.get_cart_head(username);
-                        string purchase_record = "Purchased items: ";
-                        while (current) {
-                            inventoryManager.decrease_item_quantity(current->item_name);
-                            purchase_record += current->item_name + ", ";
-                            current = current->next;
-                        }
-                        purchase_record += "Total cost: $" + to_string(total_cost);
-                        userManager.add_to_purchase_history(username, purchase_record);
-                        userManager.clear_cart(username);
-                        cout << "Checkout successful! Total cost: $" << total_cost << "\n";
-                    }
-                    break;
-                }
-                 case 5: {
-                string spec_key, spec_value;
-                cout << "Enter specification key: ";
-                cin >> spec_key;
-                cout << "Enter specification value: ";
-                cin >> spec_value;
-                inventoryManager.search_by_spec(spec_key, spec_value);
-                break;
-            }
-                case 6: {
-                    const vector<string>& history = userManager.get_purchase_history(username);
-                    for (const auto& record : history) {
-                        cout << record << "\n";
-                    }
-                    break;
-                }
-                case 7: {
                     double amount;
                     cout << "Enter amount to add: ";
                     cin >> amount;
@@ -472,8 +562,32 @@ public:
                     cout << "$" << amount << " added to your account.\n";
                     break;
                 }
-                case 8:
-                    return;
+                case 5: {
+                    cout << "\n               ==============================================================================" << endl;
+                    cout << "                                          A c c o u n t  D e t a i l s" << endl;
+                    cout << "               ==============================================================================" << endl;
+                    cout << "\n\t\t\tUsername: " << username << endl;
+                    cout << "\t\t\tMoney: $" << userManager.get_user_money(username) << endl;
+                    cout << "\t\t\tPurchase History:" << endl;
+                    const vector<string>& history = userManager.get_purchase_history(username);
+                    for (const auto& record : history) {
+                        cout << record << "\n";
+                    }
+                    while (true) {
+                        char choice;
+                        cout << "\t\t\tEnter M to return to Menu: ";
+                        cin >> choice;
+                        if (choice == 'm' || choice == 'M') {
+                            user_menu(username);
+                            system("cls");
+                        }
+                    }
+                    break;
+                }
+                case 6: {
+                    cout << "Logged out Successfully.\n";
+                    main_menu();
+                }
                 default:
                     cout << "Invalid choice. Please try again.\n";
             }
