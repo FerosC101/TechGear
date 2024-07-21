@@ -28,7 +28,7 @@ struct CartNode {
 
     CartNode(string name) : item_name(name), next(nullptr) {}
 };
-
+                                                                                                                                                                                                                                                                                                                                                                                                                                               
 class Cart {
 private:
     CartNode* head;
@@ -41,9 +41,9 @@ public:
     }
 
     void add_item(const string& item_name) {
-        CartNode* new_node = new CartNode(item_name);
-        new_node->next = head;
-        head = new_node;
+        CartNode* newNode = new CartNode(item_name);
+        newNode->next = head;
+        head = newNode;
     }
 
     void view_cart() const {
@@ -127,6 +127,32 @@ private:
         }
     }
 
+    void save_purchase_history(const string& username) {
+        ofstream file(username + "history.txt");
+        if (file.is_open()) {
+            for (const auto& record : users[username].purchase_history) {
+                file << record.item_name << " " << record.cost << " " << record.date << endl;
+            }
+            file.close();
+        }
+    }
+
+    void load_purchase_history(const string& username) {
+        ifstream file(username + "history.txt");
+        if (file.is_open()) {
+            string line;
+            while (getline(file, line)) {
+                istringstream iss(line);
+                string item_name, date;
+                double cost;
+                iss >> item_name >> cost >> date;
+                users[username].purchase_history.emplace_back(item_name, cost, date);
+            }
+            file.close();
+        }
+    }
+
+    
 public:
     UserManager() {
         load_users();
@@ -162,6 +188,9 @@ public:
     }
 
     bool add_to_cart(const string& username, const string& item) {
+        if (users.find(username) == users.end()) {
+            return false;
+        }
         users[username].cart.add_item(item);
         return true;
     }
@@ -199,9 +228,8 @@ public:
 
     void add_to_purchase_history(const string& username, const string& item_name, double cost, const string& date) {
         users[username].purchase_history.emplace_back(item_name, cost, date);
+        save_purchase_history(username);
     }
-
-    void search_item(const string& name, string& catagory);
 
     void view_purchase_history(const string& username) const {
         const auto& history = users.at(username).purchase_history;
@@ -224,21 +252,26 @@ public:
 
     void load_inventory() {
         inventory = {
-            {"Laptop", {"Laptop", "Electronics", {{"Brand", "Dell"}, {"RAM", "16GB"}, {"Storage", "512GB SSD"}}, 999.99, 10, 800.0}},
-            {"Smartphone", {"Smartphone", "Electronics", {{"Brand", "Apple"}, {"Model", "iPhone 13"}, {"Storage", "128GB"}}, 799.99, 15, 600.0}},
-            {"Smartwatch", {"Smartwatch", "Wearables", {{"Brand", "Samsung"}, {"Model", "Galaxy Watch"}, {"Battery Life", "48 hours"}}, 199.99, 20, 120.0}},
-            {"Tablet", {"Tablet", "Electronics", {{"Brand", "Microsoft"}, {"Model", "Surface Pro"}, {"Storage", "256GB"}}, 899.99, 8, 700.0}},
-            {"Headphones", {"Headphones", "Audio", {{"Brand", "Bose"}, {"Model", "QuietComfort"}, {"Type", "Over-Ear"}}, 299.99, 25, 200.0}},
-            {"Camera", {"Camera", "Photography", {{"Brand", "Canon"}, {"Model", "EOS R5"}, {"Resolution", "45MP"}}, 3899.99, 5, 3500.0}},
-            {"Gaming Console", {"Gaming Console", "Entertainment", {{"Brand", "Sony"}, {"Model", "PlayStation 5"}, {"Storage", "1TB"}}, 499.99, 30, 400.0}},
-            {"Router", {"Router", "Networking", {{"Brand", "Netgear"}, {"Model", "Nighthawk"}, {"Speed", "1Gbps"}}, 129.99, 40, 100.0}},
-            {"Monitor", {"Monitor", "Electronics", {{"Brand", "LG"}, {"Size", "27 inches"}, {"Resolution", "4K"}}, 349.99, 12, 250.0}},
-            {"Keyboard", {"Keyboard", "Peripherals", {{"Brand", "Logitech"}, {"Type", "Mechanical"}, {"Connectivity", "Wireless"}}, 79.99, 50, 60.0}},
-            {"Mouse", {"Mouse", "Peripherals", {{"Brand", "Razer"}, {"Type", "Gaming"}, {"DPI", "16000"}}, 59.99, 60, 40.0}},
-            {"External Hard Drive", {"External Hard Drive", "Storage", {{"Brand", "Western Digital"}, {"Capacity", "2TB"}, {"Type", "SSD"}}, 129.99, 25, 80.0}},
-            {"Printer", {"Printer", "Peripherals", {{"Brand", "HP"}, {"Model", "OfficeJet Pro"}, {"Type", "All-in-One"}}, 199.99, 18, 150.0}},
-            {"Speakers", {"Speakers", "Audio", {{"Brand", "JBL"}, {"Type", "Portable"}, {"Battery Life", "20 hours"}}, 99.99, 35, 70.0}},
-            {"Smart Home Hub", {"Smart Home Hub", "Smart Home", {{"Brand", "Google"}, {"Model", "Nest Hub"}, {"Voice Assistant", "Google Assistant"}}, 129.99, 10, 90.0}}
+            {"iPhone 15", {"iPhone 15", "Smartphone", {{"Brand", "Apple"}, {"Model", "iPhone 15"}, {"Storage", "256GB"}, {"Camera", "48MP + 12MP"}, {"Battery", "4000mAh"}, {"Display", "6.1-inch Super Retina XDR"}, {"Processor", "A16 Bionic"}, {"OS", "iOS 16"}, {"RAM", "6GB"}, {"Water Resistance", "IP68"}}, 49999.50, 15, 35000.0}},
+            {"Galaxy S23", {"Galaxy S23", "Smartphone", {{"Brand", "Samsung"}, {"Model", "Galaxy S23"}, {"Storage", "256GB"}, {"Camera", "50MP + 12MP + 10MP"}, {"Battery", "4500mAh"}, {"Display", "6.2-inch Dynamic AMOLED 2X"}, {"Processor", "Exynos 2200/Snapdragon 8 Gen 1"}, {"OS", "Android 13"}, {"RAM", "8GB"}, {"Water Resistance", "IP68"}}, 44999.50, 20, 32500.0}},
+            {"MacBook Pro", {"MacBook Pro", "Laptop", {{"Brand", "Apple"}, {"RAM", "16GB"}, {"Storage", "512GB SSD"}, {"Processor", "M1 Pro"}, {"Display", "14-inch Liquid Retina XDR"}, {"Battery Life", "Up to 17 hours"}, {"OS", "macOS"}, {"Weight", "3.5 lbs"}, {"Resolution", "3024 x 1964"}}, 99999.50, 10, 80000.0}},
+            {"Surface Pro 9", {"Surface Pro 9", "Tablet", {{"Brand", "Microsoft"}, {"Model", "Surface Pro 9"}, {"Storage", "512GB SSD"}, {"RAM", "16GB"}, {"Display", "13-inch PixelSense"}, {"Battery Life", "Up to 15 hours"}, {"OS", "Windows 11"}, {"Weight", "1.96 lbs"}, {"Resolution", "2880 x 1920"}}, 64999.50, 8, 50000.0}},
+            {"Sony WH-1000XM5", {"Sony WH-1000XM5", "Headphones", {{"Brand", "Sony"}, {"Model", "WH-1000XM5"}, {"Type", "Over-Ear"}, {"Battery Life", "30 hours"}, {"Noise Cancellation", "Yes"}, {"Connectivity", "Bluetooth 5.0"}, {"Weight", "254g"}, {"Frequency Response", "4Hz-40kHz"}}, 17499.50, 25, 12500.0}},
+            {"Canon EOS R6", {"Canon EOS R6", "Camera", {{"Brand", "Canon"}, {"Model", "EOS R6"}, {"Resolution", "20MP"}, {"Video", "4K 60fps"}, {"Lens Mount", "RF Mount"}, {"ISO Range", "100-102400"}, {"Screen", "3.0-inch Vari-Angle Touchscreen"}, {"Connectivity", "Wi-Fi, Bluetooth"}}, 124999.50, 5, 100000.0}},
+            {"PlayStation 5", {"PlayStation 5", "Gaming Console", {{"Brand", "Sony"}, {"Storage", "825GB SSD"}, {"Resolution", "4K UHD"}, {"Processor", "Custom AMD Ryzen Zen 2"}, {"Memory", "16GB GDDR6"}, {"Backward Compatibility", "Yes"}, {"Connectivity", "Wi-Fi, Bluetooth, USB, HDMI"}, {"Weight", "9.9 lbs"}}, 24999.50, 30, 20000.0}},
+            {"Google Nest Wifi", {"Google Nest Wifi", "Router", {{"Brand", "Google"}, {"Model", "Nest Wifi"}, {"Speed", "2200Mbps"}, {"Coverage", "2200 sq. ft."}, {"Bands", "Dual-band"}, {"Security", "WPA3"}, {"Ports", "2 Gigabit Ethernet ports per unit"}, {"Weight", "380g"}}, 8499.50, 40, 6000.0}},
+            {"LG OLED TV", {"LG OLED TV", "Television", {{"Brand", "LG"}, {"Size", "55 inches"}, {"Resolution", "4K"}, {"Display Technology", "OLED"}, {"Smart TV", "Yes"}, {"HDR", "Dolby Vision, HDR10"}, {"Refresh Rate", "120Hz"}, {"Ports", "4 HDMI, 3 USB"}, {"Weight", "18.9 kg"}}, 74999.50, 12, 60000.0}},
+            {"Logitech MX Keys", {"Logitech MX Keys", "Keyboard", {{"Brand", "Logitech"}, {"Type", "Mechanical"}, {"Connectivity", "Wireless"}, {"Battery Life", "Up to 10 days"}, {"Backlight", "Yes"}, {"Compatibility", "Windows, macOS"}, {"Weight", "810g"}, {"Dimensions", "430.2 x 131.63 x 20.5 mm"}}, 4999.50, 50, 3500.0}},
+            {"Razer DeathAdder V2", {"Razer DeathAdder V2", "Mouse", {{"Brand", "Razer"}, {"Type", "Gaming"}, {"DPI", "20000"}, {"Buttons", "8 Programmable"}, {"Connectivity", "Wired"}, {"Sensor", "Optical"}, {"Weight", "82g"}, {"Cable Length", "2.1m"}}, 3999.50, 60, 2500.0}},
+            {"Samsung T7", {"Samsung T7", "External Hard Drive", {{"Brand", "Samsung"}, {"Capacity", "1TB"}, {"Type", "SSD"}, {"Interface", "USB 3.2 Gen 2"}, {"Read Speed", "1050MB/s"}, {"Write Speed", "1000MB/s"}, {"Weight", "58g"}, {"Dimensions", "85 x 57 x 8 mm"}}, 7999.50, 25, 6000.0}},
+            {"HP LaserJet Pro", {"HP LaserJet Pro", "Printer", {{"Brand", "HP"}, {"Model", "LaserJet Pro"}, {"Type", "All-in-One"}, {"Print Speed", "28 ppm"}, {"Connectivity", "Wi-Fi, USB, Ethernet"}, {"Functions", "Print, Scan, Copy, Fax"}, {"Weight", "11.4 kg"}, {"Dimensions", "420 x 390 x 323 mm"}}, 14999.50, 18, 11000.0}},
+            {"JBL Charge 5", {"JBL Charge 5", "Speakers", {{"Brand", "JBL"}, {"Type", "Portable"}, {"Battery Life", "20 hours"}, {"Waterproof", "IP67"}, {"Power", "30W"}, {"Connectivity", "Bluetooth"}, {"Weight", "960g"}, {"Dimensions", "223 x 96.5 x 94 mm"}}, 8999.50, 35, 6500.0}},
+            {"Amazon Echo", {"Amazon Echo", "Smart Home Hub", {{"Brand", "Amazon"}, {"Model", "Echo"}, {"Voice Assistant", "Alexa"}, {"Connectivity", "Wi-Fi, Bluetooth"}, {"Audio", "360-degree sound"}, {"Smart Home Compatibility", "Yes"}, {"Weight", "780g"}, {"Dimensions", "148 x 99 x 99 mm"}}, 4999.50, 10, 3500.0}},
+            {"Dell XPS 13", {"Dell XPS 13", "Laptop", {{"Brand", "Dell"}, {"RAM", "16GB"}, {"Storage", "512GB SSD"}, {"Processor", "Intel Core i7-1185G7"}, {"Display", "13.4-inch FHD+"}, {"Battery Life", "Up to 14 hours"}, {"OS", "Windows 11"}, {"Weight", "1.2 kg"}, {"Resolution", "1920 x 1200"}}, 74999.50, 10, 60000.0}},
+            {"Apple Watch Series 8", {"Apple Watch Series 8", "Smartwatch", {{"Brand", "Apple"}, {"Model", "Series 8"}, {"Storage", "32GB"}, {"Display", "1.9-inch Retina"}, {"Battery Life", "Up to 18 hours"}, {"OS", "watchOS 9"}, {"Connectivity", "Wi-Fi, Bluetooth, GPS, Cellular"}, {"Water Resistance", "50m"}}, 19999.50, 15, 15000.0}},
+            {"Samsung Galaxy Tab S8", {"Samsung Galaxy Tab S8", "Tablet", {{"Brand", "Samsung"}, {"Storage", "128GB"}, {"RAM", "8GB"}, {"Display", "11-inch TFT"}, {"Battery", "8000mAh"}, {"Processor", "Snapdragon 8 Gen 1"}, {"OS", "Android 12"}, {"Resolution", "2560 x 1600"}, {"Weight", "503g"}}, 34999.50, 20, 25000.0}},
+            {"GoPro HERO10", {"GoPro HERO10", "Action Camera", {{"Brand", "GoPro"}, {"Resolution", "23MP"}, {"Video", "5.3K60, 4K120"}, {"Waterproof", "10m"}, {"Battery", "1720mAh"}, {"Connectivity", "Wi-Fi, Bluetooth"}, {"Weight", "153g"}, {"Dimensions", "71 x 55 x 33.6 mm"}}, 24999.50, 15, 17500.0}},
+            {"Bose QuietComfort 45", {"Bose QuietComfort 45", "Headphones", {{"Brand", "Bose"}, {"Type", "Over-Ear"}, {"Battery Life", "24 hours"}, {"Noise Cancellation", "Yes"}, {"Connectivity", "Bluetooth 5.1, USB-C"}, {"Weight", "240g"}, {"Frequency Response", "20Hz-20kHz"}}, 16499.50, 20, 12500.0}}
         };
     }
 
@@ -250,7 +283,7 @@ public:
             for (const auto& spec : item.specs) {
                 cout << spec.first << ": " << spec.second << endl;
             }
-            cout << "\t\t\tPrice: $" << item.price << endl;
+            cout << "\t\t\tPrice: Php" << item.price << endl;
             cout << "\t\t\tQuantity: " << item.quantity << endl;
             cout << "--------------------------------" << endl;
         }
@@ -301,7 +334,7 @@ public:
         double total = 0.0;
         for (const auto& pair : inventory) {
             const auto& item = pair.second;
-            total += (item.price - item.cost_price) * (item.quantity);
+            total += (item.price - item.cost_price) * (10 - item.quantity);
         }
         return total;
     }
@@ -485,9 +518,10 @@ public:
             cin >> add_to_cart_choice;
 
             if (add_to_cart_choice == 'y' || add_to_cart_choice == 'Y') {
+                cin.ignore();
                 string item_name;
                 cout << "Enter item name: ";
-                cin >> item_name;
+                getline(cin, item_name);
 
                 if (inventoryManager.get_item(item_name)) {
                     userManager.add_to_cart(username, item_name);
@@ -591,9 +625,9 @@ public:
                 case 3: {
                     string spec_key, spec_value;
                     cout << "Enter specification key: ";
-                    cin >> spec_key;
+                    getline(cin, spec_key);
                     cout << "Enter specification value: ";
-                    cin >> spec_value;
+                    getline(cin, spec_value);
                     inventoryManager.search_by_spec(spec_key, spec_value);
                     break;
                 }
@@ -602,7 +636,7 @@ public:
                     cout << "Enter amount to add: ";
                     cin >> amount;
                     userManager.add_money(username, amount);
-                    cout << "$" << amount << " added to your account.\n";
+                    cout << "Php" << amount << " added to your account.\n";
                     break;
                 }
                 case 5: {
@@ -610,7 +644,7 @@ public:
                     cout << "                                          A c c o u n t  D e t a i l s" << endl;
                     cout << "               ==============================================================================" << endl;
                     cout << "\n\t\t\tUsername: " << username << endl;
-                    cout << "\t\t\tMoney: $" << userManager.get_user_money(username) << endl;
+                    cout << "\t\t\tMoney: Php" << userManager.get_user_money(username) << endl;
                     cout << "\t\t\tPurchase History:" << endl;
                     userManager.view_purchase_history(username);
                     while (true) {
