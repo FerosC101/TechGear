@@ -128,34 +128,50 @@ private:
     }
 
     void save_purchase_history(const string& username) {
-        ofstream file(username + "history.txt");
+        ofstream file(username + "history.txt", ios::trunc);
         if (file.is_open()) {
             for (const auto& record : users[username].purchase_history) {
                 file << record.item_name << " " << record.cost << " " << record.date << endl;
             }
             file.close();
+            cout << "Purchase history saved successfully for user: " << username << endl;
+        } else {
+            cerr << "Error: Could not open file for user: " << username << endl;
         }
     }
 
+
+
     void load_purchase_history(const string& username) {
+        if (users.find(username) == users.end()) {
+            cout << "User not found.\n";
+            return;
+        }
+        
         ifstream file(username + "history.txt");
         if (file.is_open()) {
+            users[username].purchase_history.clear();
             string line;
             while (getline(file, line)) {
                 istringstream iss(line);
                 string item_name, date;
                 double cost;
-                iss >> item_name >> cost >> date;
-                users[username].purchase_history.emplace_back(item_name, cost, date);
+                if (iss >> item_name >> cost >> date) {
+                    users[username].purchase_history.emplace_back(item_name, cost, date);
+                }
             }
             file.close();
+        } else {
+            cout << "Could not open file for user: " << username << "\n";
         }
     }
-
-    
+        
 public:
     UserManager() {
         load_users();
+        for (auto& user_pair : users) {
+            load_purchase_history(user_pair.first);
+        }
     }
 
     ~UserManager() {
@@ -177,10 +193,15 @@ public:
     }
 
     bool login_user(const string& username, const string& password) {
+        load_purchase_history(username);
         if (users.find(username) == users.end()) {
             return false;
         }
-        return users[username].password == password;
+        if (users[username].password == password) {
+            load_purchase_history(username);
+            return true;
+        }
+        return false;
     }
 
     bool admin_login(const string& username, const string& password) {
@@ -226,18 +247,62 @@ public:
         users[username].cart.clear_cart();
     }
 
-    void add_to_purchase_history(const string& username, const string& item_name, double cost, const string& date) {
-        users[username].purchase_history.emplace_back(item_name, cost, date);
-        save_purchase_history(username);
+    const unordered_map<string, User>& get_users() const {
+        return users;
     }
 
-    void view_purchase_history(const string& username) const {
+    void add_to_purchase_history(const string& username, const string& item_name, double cost, const string& date) {
+        if (users.find(username) != users.end()) {
+            cout << "\t\t\tAdding to purchase history: " << item_name << ", " << cost << ", " << date << endl;
+            users[username].purchase_history.emplace_back(item_name, cost, date);
+            save_purchase_history(username);
+        } else {
+            cerr << "Error: User " << username << " not found." << endl;
+        }
+    }
+
+    void view_purchase_history(const string& username) {
+        if (users.find(username) == users.end()) {
+            cout << "User not found.\n";
+            return;
+        }
+        
+        load_purchase_history(username);
         const auto& history = users.at(username).purchase_history;
+
+        if (history.empty()) {
+            cout << "\t\t\t" << username << " has no purchase history.\n";
+            return;
+        }
+
         cout << "\t\t\t" << username << "'s Purchase History:\n";
         for (const auto& record : history) {
             cout << "Item: " << record.item_name << ", Cost: Php" << record.cost << ", Date: " << record.date << "\n";
         }
     }
+
+
+    void view_all_purchase_history() const {
+        bool hasHistory = false;
+
+        for (const auto& pair : users) {
+            const string& username = pair.first;
+            const auto& history = pair.second.purchase_history;
+
+            if (!history.empty()) {
+                cout << "\t\t\t" << username << "'s Purchase History: \n";
+                for (const auto& record : history) {
+                    cout << "Item: " << record.item_name << ", Cost: Php" << record.cost << ", Date: " << record.date << "\n";
+                }
+                hasHistory = true;
+            }
+        }
+
+        if (!hasHistory) {
+            cout << "\t\t\tNo purchase histories found for any user.\n";
+        }
+    }
+
 };
 
 class InventoryManager {
@@ -276,6 +341,7 @@ public:
     }
 
     void view_inventory() {
+        cout << "\t\t\tInventory:\n";
         for (const auto& pair : inventory) {
             const auto& item = pair.second;
             cout << "\t\t\tName\t\t: " << item.name << endl;
@@ -287,6 +353,10 @@ public:
             cout << "\t\t\tQuantity: " << item.quantity << endl;
             cout << "--------------------------------" << endl;
         }
+    }
+
+    void update_inventory(const string& item_name, int quantity) {
+        inventory[item_name].quantity -= quantity;
     }
 
     bool add_item(const Item& item) {
@@ -331,12 +401,18 @@ public:
     }
 
     double calculate_total_profit() const {
-        double total = 0.0;
-        for (const auto& pair : inventory) {
-            const auto& item = pair.second;
-            total += (item.price - item.cost_price) * (10 - item.quantity);
+        double total_profit = 0.0;
+        for (const auto& item : inventory) {
+            double profit_per_item = item.second.price - item.second.cost_price;
+            double total_item_profit = profit_per_item * (item.second.quantity - 10);
+            total_profit += total_item_profit;
         }
-        return total;
+        return total_profit;
+    }
+
+    void display_total_profit() const {
+        double total_profit = calculate_total_profit();
+        cout << "Total Profit: Php" << total_profit << endl;
     }
 
     void add_profit(double amount) {
@@ -498,6 +574,7 @@ public:
                     cout << "                                                P R O F I T" << endl;
 			        cout << "               ==============================================================================" << endl << endl;
                     cout << "\t\t\tTotal profit: $" << inventoryManager.calculate_total_profit() << "\n";
+                    userManager.view_all_purchase_history();
                     break;
                 case 7:
                     return;
@@ -547,7 +624,7 @@ public:
             cout << "\nYour Cart:\n";
             userManager.view_cart(username);
             double total_cost = userManager.get_cart(username).total_cost(inventoryManager.get_inventory());
-            cout << "Total Cost: $" << total_cost << "\n";
+            cout << "Total Cost: Php" << total_cost << "\n";
 
             cout << "Do you want to checkout or return to the menu? (c/m): ";
             char checkout_choice;
@@ -564,6 +641,15 @@ public:
                             item->quantity--;
                             double profit = item->price - item->cost_price;
                             inventoryManager.add_profit(profit);
+
+                            time_t now = time(0);
+                            char* dt = ctime(&now);
+                            string date(dt);
+                            if (!date.empty() && date.back() == '\n') {
+                                date.pop_back();
+                            }
+
+                            userManager.add_to_purchase_history(username, current->item_name, item->price, date);
                         }
                         current = current->next;
                     }
@@ -571,22 +657,15 @@ public:
                     userManager.deduct_money(username, total_cost);
                     userManager.clear_cart(username);
 
-                    // PARA SA TIJME
                     time_t now = time(0);
                     char* dt = ctime(&now);
-
-                    current = userManager.get_cart_head(username);
-                    while (current) {
-                        const Item* item = inventoryManager.get_item(current->item_name);
-                        if (item) {
-                            double item_cost = item->price;
-                            userManager.add_to_purchase_history(username, item->name, item_cost, string(dt));
-                        } 
-                        current = current->next;
+                    string date(dt);
+                    if (!date.empty() && date.back() == '\n') {
+                        date.pop_back();
                     }
-                    userManager.add_to_purchase_history(username, "Total cost: $" + to_string(total_cost), total_cost, string(dt));
-                    userManager.clear_cart(username);
-                    cout << "Checkout successful. Total cost: $" << total_cost << "\n";
+                    userManager.add_to_purchase_history(username, "Total cost", total_cost, date);
+
+                    cout << "Checkout successful. Total cost: Php" << total_cost << "\n";
                 } else {
                     cout << "Insufficient funds. Please add more money to your account.\n";
                 }
@@ -596,6 +675,8 @@ public:
             }
         }
     }
+
+
 
     void user_menu(const string& username) {
         int choice;
