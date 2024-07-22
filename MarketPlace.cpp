@@ -5,7 +5,9 @@
 #include <unordered_map>
 #include <ctime>
 #include <cstdlib>
-
+#include <set>
+#include <map>
+#include <iomanip>
 using namespace std;
 
 struct Item {
@@ -128,54 +130,50 @@ private:
     }
 
     void save_purchase_history(const string& username) {
-        ofstream file(username + "history.txt", ios::trunc);
+        ofstream file(username + "history.txt",ios::app);
         if (file.is_open()) {
             for (const auto& record : users[username].purchase_history) {
-                file << record.item_name << " " << record.cost << " " << record.date << endl;
+                file << "\"" << record.item_name << "\" " << record.cost << " " << record.date << "\n";
             }
             file.close();
-            cout << "Purchase history saved successfully for user: " << username << endl;
         } else {
             cerr << "Error: Could not open file for user: " << username << endl;
         }
     }
 
-
-
     void load_purchase_history(const string& username) {
-        if (users.find(username) == users.end()) {
-            cout << "User not found.\n";
-            return;
-        }
-        
         ifstream file(username + "history.txt");
         if (file.is_open()) {
-            users[username].purchase_history.clear();
             string line;
             while (getline(file, line)) {
                 istringstream iss(line);
-                string item_name, date;
+                string item_name;
                 double cost;
-                if (iss >> item_name >> cost >> date) {
-                    users[username].purchase_history.emplace_back(item_name, cost, date);
-                }
+                string date;
+
+                getline(iss, item_name, '\"');
+                getline(iss, item_name, '\"');
+                iss >> cost;
+                iss.ignore();
+                getline(iss, date);
+
+                users[username].purchase_history.emplace_back(item_name, cost, date);
             }
             file.close();
-        } else {
-            cout << "Could not open file for user: " << username << "\n";
         }
     }
+
         
 public:
     UserManager() {
         load_users();
-        for (auto& user_pair : users) {
-            load_purchase_history(user_pair.first);
-        }
     }
 
     ~UserManager() {
         save_users();
+        for (const auto& pair : users) {
+            save_purchase_history(pair.first);
+        }
     }
 
     bool register_user(const string& username, const string& password) {
@@ -193,12 +191,10 @@ public:
     }
 
     bool login_user(const string& username, const string& password) {
-        load_purchase_history(username);
         if (users.find(username) == users.end()) {
             return false;
         }
         if (users[username].password == password) {
-            load_purchase_history(username);
             return true;
         }
         return false;
@@ -251,9 +247,10 @@ public:
         return users;
     }
 
+    //AAYUSIN PA TONG TATLONG FUNCTION
+
     void add_to_purchase_history(const string& username, const string& item_name, double cost, const string& date) {
         if (users.find(username) != users.end()) {
-            cout << "\t\t\tAdding to purchase history: " << item_name << ", " << cost << ", " << date << endl;
             users[username].purchase_history.emplace_back(item_name, cost, date);
             save_purchase_history(username);
         } else {
@@ -266,7 +263,6 @@ public:
             cout << "User not found.\n";
             return;
         }
-        
         load_purchase_history(username);
         const auto& history = users.at(username).purchase_history;
 
@@ -275,12 +271,15 @@ public:
             return;
         }
 
+        double total_cost = 0.0;
+
         cout << "\t\t\t" << username << "'s Purchase History:\n";
+
         for (const auto& record : history) {
-            cout << "Item: " << record.item_name << ", Cost: Php" << record.cost << ", Date: " << record.date << "\n";
+            cout << "\t\t\t- Item: " << record.item_name << ", Cost: Php" << record.cost << ", Date: " << record.date << "\n";
+            total_cost += record.cost;
         }
     }
-
 
     void view_all_purchase_history() const {
         bool hasHistory = false;
@@ -302,6 +301,8 @@ public:
             cout << "\t\t\tNo purchase histories found for any user.\n";
         }
     }
+
+    
 
 };
 
@@ -661,10 +662,8 @@ public:
                     char* dt = ctime(&now);
                     string date(dt);
                     if (!date.empty() && date.back() == '\n') {
-                        date.pop_back();
+                        date.pop_back(); 
                     }
-                    userManager.add_to_purchase_history(username, "Total cost", total_cost, date);
-
                     cout << "Checkout successful. Total cost: Php" << total_cost << "\n";
                 } else {
                     cout << "Insufficient funds. Please add more money to your account.\n";
@@ -675,6 +674,7 @@ public:
             }
         }
     }
+
 
 
 
