@@ -77,9 +77,9 @@ private:
         for (const auto& record : users[username].purchase_history) {
             file << record.item_name << " " << record.cost << " " << record.date << endl;
         }
-        cout << "Purchase history saved successfully for user: " << username << endl;
+        cout << "\t\t\t\tPurchase history saved successfully for user: " << username << endl;
     } else {
-        cerr << "Error: Could not open file for user: " << username << endl;
+        cerr << "\t\t\t\tError: Could not open file for user: " << username << endl;
     }
 }
 
@@ -97,7 +97,7 @@ private:
             }
         }
     } else {
-        cout << "Could not open file for user: " << username << "\n";
+        cout << "\t\t\t\tCould not open file for user: " << username << "\n";
     }
 }
         
@@ -147,7 +147,7 @@ public:
     }
 
     void view_cart(const string& username) {
-        cout << username << "'s Cart:\n";
+        cout << "\t\t\t\t\t\t"<< username << "'s Cart:\n";
         users[username].cart.view_cart();
     }
 
@@ -187,7 +187,7 @@ public:
             users[username].purchase_history.emplace_back(item_name, cost, date);
             save_purchase_history(username);
         } else {
-            cerr << "Error: User " << username << " not found." << endl;
+            cerr << "\t\t\tError: User " << username << " not found." << endl;
         }
     }
 
@@ -241,64 +241,64 @@ public:
         unique_ptr<Statement> stmt(conn->createStatement());
         unique_ptr<ResultSet> res(stmt->executeQuery("SELECT * FROM your_table_name"));
         while (res->next()) {
-            cout << "Item: " << res->getString("item_name") 
+            cout << "\t\t\tItem: " << res->getString("item_name") 
                  << ", Quantity: " << res->getInt("quantity") 
                  << ", Price: " << res->getDouble("price") << endl;
         }
     } catch (SQLException &e) {
-        cerr << "SQL Error: " << e.what() << " (SQLSTATE: " << e.getSQLState() << ")\n";
+        cerr << "\t\t\tSQL Error: " << e.what() << " (SQLSTATE: " << e.getSQLState() << ")\n";
         }
     }
 
     void add_item(Connection *conn, const string &item_name, int quantity, double price) {
         try {
             unique_ptr<PreparedStatement> pstmt(conn->prepareStatement(
-                "INSERT INTO your_table_name (item_name, quantity, price) VALUES (?, ?, ?)"));
+                "\t\t\tINSERT INTO your_table_name (item_name, quantity, price) VALUES (?, ?, ?)"));
             pstmt->setString(1, item_name);
             pstmt->setInt(2, quantity);
             pstmt->setDouble(3, price);
             pstmt->execute();
-            cout << "Item added successfully." << endl;
+            cout << "\t\t\t\t\tItem added successfully." << endl;
         } catch (SQLException &e) {
-            cerr << "Error: " << e.what() << endl;
+            cerr << "\t\t\t\t\tError: " << e.what() << endl;
         }
     }
 
     void edit_price(Connection *conn, const string &item_name, double new_price) {
         try {
             unique_ptr<PreparedStatement> pstmt(conn->prepareStatement(
-                "UPDATE your_table_name SET price = ? WHERE item_name = ?"));
+                "\t\t\tUPDATE your_table_name SET price = ? WHERE item_name = ?"));
             pstmt->setDouble(1, new_price);
             pstmt->setString(2, item_name);
             pstmt->executeUpdate();
-            cout << "Price updated successfully." << endl;
+            cout << "\t\t\t\t\tPrice updated successfully." << endl;
         } catch (SQLException &e) {
-            cerr << "Error: " << e.what() << endl;
+            cerr << "\t\t\t\t\tError: " << e.what() << endl;
         }
     }
 
     void edit_quantity(Connection *conn, const string &item_name, int new_quantity) {
         try {
             unique_ptr<PreparedStatement> pstmt(conn->prepareStatement(
-                "UPDATE your_table_name SET quantity = ? WHERE item_name = ?"));
+                "\t\t\tUPDATE your_table_name SET quantity = ? WHERE item_name = ?"));
             pstmt->setInt(1, new_quantity);
             pstmt->setString(2, item_name);
             pstmt->executeUpdate();
-            cout << "Quantity updated successfully." << endl;
+            cout << "\t\t\t\t\tQuantity updated successfully." << endl;
         } catch (SQLException &e) {
-            cerr << "Error: " << e.what() << endl;
+            cerr << "\t\t\t\t\tError: " << e.what() << endl;
         }
     }
 
     void delete_item(Connection *conn, const string &item_name) {
         try {
             unique_ptr<PreparedStatement> pstmt(conn->prepareStatement(
-                "DELETE FROM your_table_name WHERE item_name = ?"));
+                "\t\t\tDELETE FROM your_table_name WHERE item_name = ?"));
             pstmt->setString(1, item_name);
             pstmt->execute();
-            cout << "Item deleted successfully." << endl;
+            cout << "\t\t\t\t\tItem deleted successfully." << endl;
         } catch (SQLException &e) {
-            cerr << "Error: " << e.what() << endl;
+            cerr << "\t\t\t\t\tError: " << e.what() << endl;
         }
     }
 
@@ -306,12 +306,12 @@ public:
         try {
             unique_ptr<Statement> stmt(conn->createStatement());
             unique_ptr<ResultSet> res(stmt->executeQuery(
-                "SELECT SUM(price * quantity) AS total_profit FROM your_table_name"));
+                "\t\t\tSELECT SUM(price * quantity) AS total_profit FROM your_table_name"));
             if (res->next()) {
-                cout << "Total Profit: " << res->getDouble("total_profit") << endl;
+                cout << "\t\t\t\tTotal Profit: " << res->getDouble("total_profit") << endl;
             }
         } catch (SQLException &e) {
-            cerr << "Error: " << e.what() << endl;
+            cerr << "\t\t\t\t\tError: " << e.what() << endl;
         }
     }
 };
@@ -364,20 +364,20 @@ public:
                         string item_name;
                         int quantity;
                         double price;
-                        cout << "Enter item name: ";
+                        cout << "\t\t\tEnter item name: ";
                         cin.ignore();
                         getline(cin, item_name);
-                        cout << "Enter quantity: ";
+                        cout << "\t\t\tEnter quantity: ";
                         while (!(cin >> quantity) || quantity < 0) {
                             cin.clear();
                             cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                            cout << "Invalid quantity. Please enter a positive integer: ";
+                            cout << "\t\t\t\tInvalid quantity. Please enter a positive integer: ";
                         }
-                        cout << "Enter price: ";
+                        cout << "\t\t\tEnter price: ";
                         while (!(cin >> price) || price < 0.0) {
                             cin.clear();
                             cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                            cout << "Invalid price. Please enter a positive number: ";
+                            cout << "\t\t\t\tInvalid price. Please enter a positive number: ";
                         }
                         inventoryManager.add_item(conn.get(), item_name, quantity, price);
                         break;
@@ -385,14 +385,14 @@ public:
                     case 3: {
                         string item_name;
                         double new_price;
-                        cout << "Enter item name: ";
+                        cout << "\t\t\tEnter item name: ";
                         cin.ignore();
                         getline(cin, item_name);
-                        cout << "Enter new price: ";
+                        cout << "\t\t\tEnter new price: ";
                         while (!(cin >> new_price) || new_price < 0.0) {
                             cin.clear();
                             cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                            cout << "Invalid price. Please enter a positive number: ";
+                            cout << "\t\t\t\tInvalid price. Please enter a positive number: ";
                         }
                         inventoryManager.edit_price(conn.get(), item_name, new_price);
                         break;
@@ -400,21 +400,21 @@ public:
                     case 4: {
                         string item_name;
                         int new_quantity;
-                        cout << "Enter item name: ";
+                        cout << "\t\t\tEnter item name: ";
                         cin.ignore();
                         getline(cin, item_name);
-                        cout << "Enter new quantity: ";
+                        cout << "\t\t\tEnter new quantity: ";
                         while (!(cin >> new_quantity) || new_quantity < 0) {
                             cin.clear();
                             cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                            cout << "Invalid quantity. Please enter a positive integer: ";
+                            cout << "\t\t\t\t\tInvalid quantity. Please enter a positive integer: ";
                         }
                         inventoryManager.edit_quantity(conn.get(), item_name, new_quantity);
                         break;
                     }
                     case 5: {
                         string item_name;
-                        cout << "Enter item name to delete: ";
+                        cout << "\t\t\tEnter item name to delete: ";
                         cin.ignore();
                         getline(cin, item_name);
                         inventoryManager.delete_item(conn.get(), item_name);
@@ -426,11 +426,11 @@ public:
                     case 7:
                         return;
                     default:
-                        cout << "Invalid choice. Please try again.\n";
+                        cout << "\t\t\t\t\tInvalid choice. Please try again.\n";
                         break;
                 }
             } catch (SQLException &e) {
-                cerr << "SQL Error: " << e.what() << " (SQLSTATE: " << e.getSQLState() << ")\n";
+                cerr << "\t\t\t\tSQL Error: " << e.what() << " (SQLSTATE: " << e.getSQLState() << ")\n";
             }
         }
     }
