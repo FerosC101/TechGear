@@ -237,7 +237,7 @@ public:
     void view_inventory(Connection* conn) {
         try {
             unique_ptr<Statement> stmt(conn->createStatement());
-            unique_ptr<ResultSet> res(stmt->executeQuery("SELECT * FROM Inventory"));
+            unique_ptr<ResultSet> res(stmt->executeQuery("SELECT * FROM inventory"));
             while (res->next()) {
                 cout << "Item: " << res->getString("item_name") << ", Quantity: " << res->getInt("quantity") << ", Price: " << res->getDouble("price") << endl;
             }
@@ -249,7 +249,7 @@ public:
 
     void add_item(Connection* conn, const string& item_name, int quantity, double price) {
         try {
-            unique_ptr<PreparedStatement> pstmt(conn->prepareStatement("INSERT INTO Inventory (item_name, quantity, price) VALUES (?, ?, ?)"));
+            unique_ptr<PreparedStatement> pstmt(conn->prepareStatement("INSERT INTO inventory (item_name, quantity, price) VALUES (?, ?, ?)"));
             pstmt->setString(1, item_name);
             pstmt->setInt(2, quantity);
             pstmt->setDouble(3, price);
@@ -263,7 +263,7 @@ public:
 
     void edit_price(Connection* conn, const string& item_name, double new_price) {
         try {
-            unique_ptr<PreparedStatement> pstmt(conn->prepareStatement("UPDATE Inventory SET price = ? WHERE item_name = ?"));
+            unique_ptr<PreparedStatement> pstmt(conn->prepareStatement("UPDATE inventory SET price = ? WHERE item_name = ?"));
             pstmt->setDouble(1, new_price);
             pstmt->setString(2, item_name);
             pstmt->executeUpdate();
@@ -276,7 +276,7 @@ public:
 
     void edit_quantity(Connection* conn, const string& item_name, int new_quantity) {
         try {
-            unique_ptr<PreparedStatement> pstmt(conn->prepareStatement("UPDATE Inventory SET quantity = ? WHERE item_name = ?"));
+            unique_ptr<PreparedStatement> pstmt(conn->prepareStatement("UPDATE inventory SET quantity = ? WHERE item_name = ?"));
             pstmt->setInt(1, new_quantity);
             pstmt->setString(2, item_name);
             pstmt->executeUpdate();
@@ -289,7 +289,7 @@ public:
 
     void delete_item(Connection* conn, const string& item_name) {
         try {
-            unique_ptr<PreparedStatement> pstmt(conn->prepareStatement("DELETE FROM Inventory WHERE item_name = ?"));
+            unique_ptr<PreparedStatement> pstmt(conn->prepareStatement("DELETE FROM inventory WHERE item_name = ?"));
             pstmt->setString(1, item_name);
             pstmt->execute();
             cout << "Item deleted successfully." << endl;
@@ -302,7 +302,7 @@ public:
     void calculate_total_profit(Connection* conn) {
         try {
             unique_ptr<Statement> stmt(conn->createStatement());
-            unique_ptr<ResultSet> res(stmt->executeQuery("SELECT SUM(price * quantity) AS total_profit FROM Inventory"));
+            unique_ptr<ResultSet> res(stmt->executeQuery("SELECT SUM(price * quantity) AS total_profit FROM inventory"));
             if (res->next()) {
                 cout << "Total Profit: " << res->getDouble("total_profit") << endl;
             }
@@ -342,8 +342,8 @@ public:
             shared_ptr<Connection> conn;
             try {
                 driver = mysql::get_mysql_driver_instance();
-                conn.reset(driver->connect("tcp://localhost:3306", "root", " ")); // Replace with actual host, username, and password
-                conn->setSchema("techgear"); // Replace with actual database name
+                conn.reset(driver->connect("tcp://localhost:3306", "root", " "));
+                conn->setSchema("techgear");
 
                 switch (choice) {
                 case 1:
