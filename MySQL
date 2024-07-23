@@ -30,7 +30,7 @@ struct Item {
 
 class Cart {
 private:
-    CartNode* head;
+    CartNode *head;
 
 public:
     Cart() : head(nullptr) {}
@@ -402,16 +402,20 @@ public:
             unique_ptr<Statement> stmt(conn->createStatement());
             unique_ptr<ResultSet> res(stmt->executeQuery("SELECT SUM(price * quantity) AS total_profit FROM inventory"));
             if (res->next()) {
-                cout << "Total Profit: " << res->getDouble("total_profit") << endl;
+                total_profit = res->getDouble("total_profit");
+            }
+            else {
+                total_profit = 0.0;
             }
         }
         catch (SQLException& e) {
             cerr << "Error: " << e.what() << endl;
+            total_profit = 0.0;
         }
     }
 
-    void display_total_profit() const {
-        double total_profit = calculate_total_profit();
+    void display_total_profit(Connection* conn) {
+        calculate_total_profit(conn);
         cout << "Total Profit: Php" << total_profit << endl;
     }
 
@@ -460,7 +464,7 @@ public:
 };
 
 class Techgear {
-private: 
+private:
     UserManager userManager;
     InventoryManager inventoryManager;
 
@@ -604,7 +608,7 @@ public:
                     admin_menu();
                 }
                 else {
-                    cout << "\t\t\t\t\tInvalid admin credentials.\n";
+                    cout << "\n\t\t\tInvalid admin username or password. Please try again.\n" << endl;
                 }
                 break;
             case 2:
@@ -619,25 +623,71 @@ public:
                     user_menu(username);
                 }
                 else {
-                    cout << "\t\t\t\t\tInvalid username or password.\n";
+                    cout << "\n\t\t\tInvalid username or password. Please try again.\n" << endl;
                 }
                 break;
             case 3:
                 cout << "               ==============================================================================" << endl;
-                cout << "                                                R E G I S T E R" << endl;
+                cout << "                                              R E G I S T R A T I O N" << endl;
                 cout << "               ==============================================================================" << endl << endl;
-                cout << "\t\t\tEnter username\t\t: ";
+                cout << "\t\t\tEnter new username\t\t: ";
                 cin >> username;
-                cout << "\t\t\tEnter password\t\t: ";
+                cout << "\t\t\tEnter new password\t\t: ";
                 cin >> password;
-                if (userManager.register_user(username, password)) {
-                    cout << "\t\t\t\tRegistration successful. You can now log in.\n";
-                }
-                else {
-                    cout << "\t\t\t\tUsername already exists. Please choose a different username.\n";
-                }
+                userManager.register_user(username, password);
                 break;
             case 4:
+                return;
+            default:
+                cout << "\t\t\t\t\tInvalid choice. Please try again.\n";
+            }
+        }
+    }
+
+    void user_menu(const string& username) {
+        int choice;
+        while (true) {
+            cout << "               ==============================================================================" << endl;
+            cout << "                                             U S E R   M E N U" << endl;
+            cout << "               ==============================================================================" << endl << endl;
+            cout << "\t\t\t[1]\tView Cart" << endl;
+            cout << "\t\t\t[2]\tAdd to Cart" << endl;
+            cout << "\t\t\t[3]\tView Purchase History" << endl;
+            cout << "\t\t\t[4]\tAdd Money" << endl;
+            cout << "\t\t\t[5]\tExit\n" << endl;
+            cout << "                           =====================================================" << endl;
+            cout << "                                                Enter Mode: ";
+            cin >> choice;
+            system("cls");
+
+            switch (choice) {
+            case 1:
+                userManager.view_cart(username);
+                break;
+            case 2: {
+                string item;
+                cout << "Enter item name to add to cart: ";
+                cin >> item;
+                if (inventoryManager.item_exists(item)) {
+                    userManager.add_to_cart(username, item);
+                    cout << "Item added to cart." << endl;
+                }
+                else {
+                    cout << "Item does not exist." << endl;
+                }
+                break;
+            }
+            case 3:
+                userManager.view_purchase_history(username);
+                break;
+            case 4: {
+                double amount;
+                cout << "Enter amount to add: ";
+                cin >> amount;
+                userManager.add_money(username, amount);
+                break;
+            }
+            case 5:
                 return;
             default:
                 cout << "\t\t\t\t\tInvalid choice. Please try again.\n";
