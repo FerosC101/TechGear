@@ -439,10 +439,31 @@ public:
     }
 
     void search_by_spec(const string& spec_key, const string& spec_value) {
+    bool found = false;
+    for (const auto& pair : inventory) {
+        const auto& item = pair.second;
+        if (item.specs.find(spec_key) != item.specs.end() && item.specs.at(spec_key) == spec_value) {
+            cout << "\t\t\tName: " << item.name << endl;
+            cout << "\t\t\tCategory: " << item.category << endl;
+            for (const auto& spec : item.specs) {
+                cout << spec.first << ": " << spec.second << endl;
+            }
+            cout << "\t\t\tPrice: $" << item.price << endl;
+            cout << "\t\t\tQuantity: " << item.quantity << endl;
+            cout << "                           =====================================================" << endl;
+            found = true;
+        }
+    }
+    if (!found) {
+        cout << "\t\t\t\t\tNo items found with " << spec_key << " = " << spec_value << endl;
+    }
+}
+
+    void search_by_name(const string& name) {
         bool found = false;
         for (const auto& pair : inventory) {
             const auto& item = pair.second;
-            if (item.specs.find(spec_key) != item.specs.end() && item.specs.at(spec_key) == spec_value) {
+            if (item.name == name) {
                 cout << "\t\t\tName: " << item.name << endl;
                 cout << "\t\t\tCategory: " << item.category << endl;
                 for (const auto& spec : item.specs) {
@@ -455,7 +476,7 @@ public:
             }
         }
         if (!found) {
-            cout << "\t\t\t\t\tNo items found with " << spec_key << " = " << spec_value << endl;
+            cout << "\t\t\t\t\tNo items found with name = " << name << endl;
         }
     }
 };
@@ -706,16 +727,34 @@ public:
                     break;
                 }
                 case 3: {
+                int searchChoice;
+                cout << "              ====================================" << endl;
+                cout << "                           Search Menu" << endl;
+                cout << "              ====================================" << endl;
+                cout << "\t\t\t[1]\tSearch by Name" << endl;
+                cout << "\t\t\t[2]\tSearch by Specifications" << endl;
+                cout << "              ====================================" << endl;
+                cout << "                      Enter Choice: ";
+                cin >> searchChoice;
+                cin.ignore();
+
+                if (searchChoice == 1) {
+                    string name;
+                    cout << "Enter the name of the item: ";
+                    getline(cin, name);
+                    inventoryManager.search_by_name(name);
+                } else if (searchChoice == 2) {
                     string spec_key, spec_value;
-                    cin.ignore();
                     cout << "Enter specification key: ";
                     getline(cin, spec_key);
-                    cin.ignore();
                     cout << "Enter specification value: ";
                     getline(cin, spec_value);
                     inventoryManager.search_by_spec(spec_key, spec_value);
-                    break;
+                } else {
+                    cout << "Invalid choice. Please try again." << endl;
                 }
+                break;
+            }
                 case 4: {
                     double amount;
                     cout << "Enter amount to add: ";
