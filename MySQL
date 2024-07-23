@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <string>
 #include <memory>
+#include <cstdlib>
 #include <fstream>
 #include <sstream>
 
@@ -28,9 +29,16 @@ struct Item {
         : name(n), category(c), specs(s), price(p), quantity(q), cost_price(cp) {}
 };
 
+struct CartNode {
+    string item_name;
+    CartNode* next;
+
+    CartNode(string name) : item_name(name), next(nullptr) {}
+};
+
 class Cart {
 private:
-    CartNode *head;
+    CartNode* head;
 
 public:
     Cart() : head(nullptr) {}
@@ -74,13 +82,6 @@ public:
     CartNode* get_head() const {
         return head;
     }
-};
-
-struct CartNode {
-    string item_name;
-    CartNode* next;
-
-    CartNode(string name) : item_name(name), next(nullptr) {}
 };
 
 struct PurchaseRecord {
@@ -311,10 +312,10 @@ public:
 
 
 class InventoryManager {
-private:
+   
+public:
     unordered_map<string, Item> inventory;
     double total_profit;
-public:
     void view_inventory(Connection* conn) {
         try {
             unique_ptr<Statement> stmt(conn->createStatement());
@@ -332,40 +333,15 @@ public:
         inventory[item_name].quantity -= quantity;
     }
 
-    void add_item(Connection* conn, const string& item_name, int quantity, double price) {
+    void add_item(Connection* conn, const string& item_name, int quantity, double cost_price, double sell_price) {
         try {
-            unique_ptr<PreparedStatement> pstmt(conn->prepareStatement("INSERT INTO inventory (item_name, quantity, price) VALUES (?, ?, ?)"));
+            unique_ptr<PreparedStatement> pstmt(conn->prepareStatement("INSERT INTO inventory (item_name, quantity, cost_price, sell_price) VALUES (?, ?, ?, ?)"));
             pstmt->setString(1, item_name);
             pstmt->setInt(2, quantity);
-            pstmt->setDouble(3, price);
-            pstmt->execute();
-            cout << "Item added successfully." << endl;
-        }
-        catch (SQLException& e) {
-            cerr << "Error: " << e.what() << endl;
-        }
-    }
-
-    void edit_price(Connection* conn, const string& item_name, double new_price) {
-        try {
-            unique_ptr<PreparedStatement> pstmt(conn->prepareStatement("UPDATE inventory SET price = ? WHERE item_name = ?"));
-            pstmt->setDouble(1, new_price);
-            pstmt->setString(2, item_name);
+            pstmt->setDouble(3, cost_price);
+            pstmt->setDouble(4, sell_price);
             pstmt->executeUpdate();
-            cout << "Price updated successfully." << endl;
-        }
-        catch (SQLException& e) {
-            cerr << "Error: " << e.what() << endl;
-        }
-    }
-
-    void edit_quantity(Connection* conn, const string& item_name, int new_quantity) {
-        try {
-            unique_ptr<PreparedStatement> pstmt(conn->prepareStatement("UPDATE inventory SET quantity = ? WHERE item_name = ?"));
-            pstmt->setInt(1, new_quantity);
-            pstmt->setString(2, item_name);
-            pstmt->executeUpdate();
-            cout << "Quantity updated successfully." << endl;
+            cout << "Item added successfully!" << endl;
         }
         catch (SQLException& e) {
             cerr << "Error: " << e.what() << endl;
@@ -376,329 +352,377 @@ public:
         try {
             unique_ptr<PreparedStatement> pstmt(conn->prepareStatement("DELETE FROM inventory WHERE item_name = ?"));
             pstmt->setString(1, item_name);
-            pstmt->execute();
-            cout << "Item deleted successfully." << endl;
+            pstmt->executeUpdate();
+            cout << "Item deleted successfully!" << endl;
         }
         catch (SQLException& e) {
             cerr << "Error: " << e.what() << endl;
         }
-    }
-
-    void decrease_item_quantity(const string& item_name) {
-        if (inventory.find(item_name) != inventory.end()) {
-            inventory[item_name].quantity--;
-        }
-    }
-
-    Item* get_item(const string& item_name) {
-        if (inventory.find(item_name) == inventory.end()) {
-            return nullptr;
-        }
-        return &inventory[item_name];
-    }
-
-    void calculate_total_profit(Connection* conn) {
-        try {
-            unique_ptr<Statement> stmt(conn->createStatement());
-            unique_ptr<ResultSet> res(stmt->executeQuery("SELECT SUM(price * quantity) AS total_profit FROM inventory"));
-            if (res->next()) {
-                total_profit = res->getDouble("total_profit");
-            }
-            else {
-                total_profit = 0.0;
-            }
-        }
-        catch (SQLException& e) {
-            cerr << "Error: " << e.what() << endl;
-            total_profit = 0.0;
-        }
-    }
-
-    void display_total_profit(Connection* conn) {
-        calculate_total_profit(conn);
-        cout << "Total Profit: Php" << total_profit << endl;
-    }
-
-    void add_profit(double amount) {
-        total_profit += amount;
-    }
-
-    void update_profit(double amount) {
-        total_profit += amount;
-    }
-
-    double get_total_profit() const {
-        return total_profit;
-    }
-
-    const unordered_map<string, Item>& get_inventory() const {
-        return inventory;
-    }
-
-    bool item_exists(const string& item_name) const {
-        return inventory.find(item_name) != inventory.end();
     }
 
     void search_by_spec(const string& spec_key, const string& spec_value) {
         bool found = false;
         for (const auto& pair : inventory) {
             const auto& item = pair.second;
-            if (item.specs.find(spec_key) != item.specs.end() && item.specs.at(spec_key) == spec_value) {
-                cout << "\t\t\tName: " << item.name << endl;
-                cout << "\t\t\tCategory: " << item.category << endl;
-                for (const auto& spec : item.specs) {
-                    cout << spec.first << ": " << spec.second << endl;
-                }
-                cout << "\t\t\tPrice: $" << item.price << endl;
-                cout << "\t\t\tQuantity: " << item.quantity << endl;
-                cout << "                           =====================================================" << endl;
+            auto it = item.specs.find(spec_key);
+            if (it != item.specs.end() && it->second == spec_value) {
+                // Print item details
                 found = true;
             }
         }
         if (!found) {
-            cout << "\t\t\t\t\tNo items found with " << spec_key << " = " << spec_value << endl;
+            cout << "No items found with " << spec_key << " = " << spec_value << endl;
         }
     }
 
+    void view_top_selling_items() {
+        cout << "Top Selling Items:\n";
+        for (const auto& pair : inventory) {
+            const auto& item = pair.second;
+            cout << "Item: " << item.name << ", Sold Quantity: " << item.quantity << "\n";
+        }
+    }
 
+    void update_profit(double profit) {
+        total_profit += profit;
+    }
+
+    double get_total_profit() const {
+        return total_profit;
+    }
+
+    void restock_item(Connection* conn, const string& item_name, int quantity) {
+        try {
+            unique_ptr<PreparedStatement> pstmt(conn->prepareStatement("UPDATE inventory SET quantity = quantity + ? WHERE item_name = ?"));
+            pstmt->setInt(1, quantity);
+            pstmt->setString(2, item_name);
+            pstmt->executeUpdate();
+            cout << "Item restocked successfully!" << endl;
+        }
+        catch (SQLException& e) {
+            cerr << "Error: " << e.what() << endl;
+        }
+    }
+
+    void load_inventory() {
+        ifstream file("inventory.txt");
+        if (file.is_open()) {
+            string line;
+            while (getline(file, line)) {
+                istringstream iss(line);
+                string name, category;
+                unordered_map<string, string> specs;
+                double price;
+                int quantity;
+                double cost_price;
+
+                iss >> name >> category;
+                string spec_line;
+                while (getline(iss, spec_line, ';')) {
+                    size_t pos = spec_line.find(':');
+                    if (pos != string::npos) {
+                        string key = spec_line.substr(0, pos);
+                        string value = spec_line.substr(pos + 1);
+                        specs[key] = value;
+                    }
+                }
+                iss >> price >> quantity >> cost_price;
+
+                inventory[name] = Item(name, category, specs, price, quantity, cost_price);
+            }
+            file.close();
+        }
+    }
+
+    void save_inventory() {
+        ofstream file("inventory.txt");
+        if (file.is_open()) {
+            for (const auto& pair : inventory) {
+                const auto& item = pair.second;
+                file << item.name << " " << item.category << " ";
+                for (const auto& spec : item.specs) {
+                    file << spec.first << ":" << spec.second << ";";
+                }
+                file << item.price << " " << item.quantity << " " << item.cost_price << "\n";
+            }
+            file.close();
+        }
+    }
 };
 
 class Techgear {
 private:
-    UserManager userManager;
-    InventoryManager inventoryManager;
+    InventoryManager inventory_manager;
+    UserManager user_manager;
+    unique_ptr<Connection> conn;
 
 public:
-    void admin_menu() {
-        int choice;
-        while (true) {
-            cout << "               ==============================================================================" << endl;
-            cout << "                                              A D M I N   M E N U" << endl;
-            cout << "               ==============================================================================" << endl << endl;
-            cout << "\t\t\t[1]\tView Inventory" << endl;
-            cout << "\t\t\t[2]\tAdd Item" << endl;
-            cout << "\t\t\t[3]\tEdit Price" << endl;
-            cout << "\t\t\t[4]\tEdit Quantity" << endl;
-            cout << "\t\t\t[5]\tDelete Item" << endl;
-            cout << "\t\t\t[6]\tCalculate Total Profit" << endl;
-            cout << "\t\t\t[7]\tExit\n" << endl;
-            cout << "                           =====================================================" << endl;
-            cout << "                                                Enter Mode: ";
-            cin >> choice;
-            system("cls");
+    Techgear() {
+        try {
+            Driver* driver = get_mysql_driver_instance();
 
-            mysql::MySQL_Driver* driver;
-            shared_ptr<Connection> conn;
-            try {
-                driver = mysql::get_mysql_driver_instance();
-                conn.reset(driver->connect("tcp://localhost:3306", "root", " "));
-                conn->setSchema("techgear");
-
-                switch (choice) {
-                case 1:
-                    cout << "               ==============================================================================" << endl;
-                    cout << "                                               I N V E N T O R Y" << endl;
-                    cout << "               ==============================================================================" << endl << endl;
-                    inventoryManager.view_inventory(conn.get());
-                    break;
-                case 2: {
-                    string item_name;
-                    int quantity;
-                    double price;
-                    cout << "Enter item name: ";
-                    cin >> item_name;
-                    cout << "Enter quantity: ";
-                    cin >> quantity;
-                    cout << "Enter price: ";
-                    cin >> price;
-                    inventoryManager.add_item(conn.get(), item_name, quantity, price);
-                    break;
-                }
-                case 3: {
-                    string item_name;
-                    double new_price;
-                    cout << "Enter item name: ";
-                    cin >> item_name;
-                    cout << "Enter new price: ";
-                    cin >> new_price;
-                    inventoryManager.edit_price(conn.get(), item_name, new_price);
-                    break;
-                }
-                case 4: {
-                    string item_name;
-                    int new_quantity;
-                    cout << "Enter item name: ";
-                    cin >> item_name;
-                    cout << "Enter new quantity: ";
-                    cin >> new_quantity;
-                    inventoryManager.edit_quantity(conn.get(), item_name, new_quantity);
-                    break;
-                }
-                case 5: {
-                    string item_name;
-                    cout << "Enter item name: ";
-                    cin >> item_name;
-                    inventoryManager.delete_item(conn.get(), item_name);
-                    break;
-                }
-                case 6:
-                    inventoryManager.calculate_total_profit(conn.get());
-                    break;
-                case 7:
-                    return;
-                default:
-                    cout << "\t\t\t\t\tInvalid choice. Please try again.\n";
-                }
-            }
-            catch (SQLException& e) {
-                cerr << "Error: " << e.what() << endl;
-            }
-        }
-    }
-
-    void introduction() {
-        cout << endl;
-        cout << "               ==============================================================================" << endl;
-        cout << "                                              T e c h G e a r" << endl;
-        cout << "               ==============================================================================" << endl;
-        cout << endl;
-        cout << "                         ====================             ==============         " << endl;
-        cout << "                        /====================           ================        " << endl;
-        cout << "                        ////////=====///////          /======//////=====       " << endl;
-        cout << "                               /=====                 /=====      /////             " << endl;
-        cout << "                               /=====                 /=====                    " << endl;
-        cout << "                               /=====                 /=====      =======       " << endl;
-        cout << "                               /=====                 /=====     /=======       " << endl;
-        cout << "                               /=====                 /======     //=====       " << endl;
-        cout << "                               /=====          ====    /================/   ==== " << endl;
-        cout << "                               /=====         /====     /==============/   /==== " << endl;
-        cout << "                               //////         ////       //////////////     ////" << endl;
-        cout << endl;
-        cout << "               ==============================================================================" << endl;
-        cout << "                           CREATED BY : FAJUTNAO  |  NUNEZ  |  PAULOS  |  VILLAR" << endl;
-        cout << "               ==============================================================================" << endl << endl << endl;
-    }
-
-    void main_menu() {
-        int choice;
-        string username, password;
-
-        while (true) {
-            cout << "                           =====================================================" << endl;
-            cout << "                                               [1] Admin Log-in " << endl;
-            cout << "                                               [2] User Log-in " << endl;
-            cout << "                                               [3] Register " << endl;
-            cout << "                                               [4] Exit " << endl;
-            cout << "                           =====================================================" << endl;
-            cout << endl << endl;
-            cout << "                                                Enter Mode: ";
-            cin >> choice;
-            system("cls");
-
-            switch (choice) {
-            case 1:
-                cout << "               ==============================================================================" << endl;
-                cout << "                                          A D M I N   L O G - I N" << endl;
-                cout << "               ==============================================================================" << endl << endl;
-                cout << "\t\t\tEnter admin username\t\t: ";
-                cin >> username;
-                cout << "\t\t\tEnter admin password\t\t: ";
-                cin >> password;
-                if (userManager.admin_login(username, password)) {
-                    admin_menu();
-                }
-                else {
-                    cout << "\n\t\t\tInvalid admin username or password. Please try again.\n" << endl;
-                }
-                break;
-            case 2:
-                cout << "               ==============================================================================" << endl;
-                cout << "                                          U S E R   L O G - I N" << endl;
-                cout << "               ==============================================================================" << endl << endl;
-                cout << "\t\t\tEnter username\t\t: ";
-                cin >> username;
-                cout << "\t\t\tEnter password\t\t: ";
-                cin >> password;
-                if (userManager.login_user(username, password)) {
-                    user_menu(username);
-                }
-                else {
-                    cout << "\n\t\t\tInvalid username or password. Please try again.\n" << endl;
-                }
-                break;
-            case 3:
-                cout << "               ==============================================================================" << endl;
-                cout << "                                              R E G I S T R A T I O N" << endl;
-                cout << "               ==============================================================================" << endl << endl;
-                cout << "\t\t\tEnter new username\t\t: ";
-                cin >> username;
-                cout << "\t\t\tEnter new password\t\t: ";
-                cin >> password;
-                userManager.register_user(username, password);
-                break;
-            case 4:
+            // Using _dupenv_s to get environment variables
+            char* db_user = nullptr;
+            size_t db_user_len = 0;
+            if (_dupenv_s(&db_user, &db_user_len, "DB_USER") != 0 || db_user == nullptr) {
+                cerr << "Database user environment variable not set" << endl;
                 return;
-            default:
-                cout << "\t\t\t\t\tInvalid choice. Please try again.\n";
             }
+
+            char* db_password = nullptr;
+            size_t db_password_len = 0;
+            if (_dupenv_s(&db_password, &db_password_len, "DB_PASSWORD") != 0 || db_password == nullptr) {
+                cerr << "Database password environment variable not set" << endl;
+                free(db_user);
+                return;
+            }
+
+            conn.reset(driver->connect("tcp://localhost:3306", db_user, db_password));
+            conn->setSchema("techgear");
+
+            // Free the allocated memory
+            free(db_user);
+            free(db_password);
+        }
+        catch (SQLException& e) {
+            cerr << "Database connection failed: " << e.what() << endl;
+            return;
         }
     }
 
-    void user_menu(const string& username) {
+    void register_user() {
+        string username, password;
+        cout << "Enter username: ";
+        cin >> username;
+        cout << "Enter password: ";
+        cin >> password;
+        if (user_manager.register_user(username, password)) {
+            cout << "Registration successful!\n";
+        }
+        else {
+            cout << "Username already exists. Try again.\n";
+        }
+    }
+
+    void user_login() {
+        string username, password;
+        cout << "Enter username: ";
+        cin >> username;
+        cout << "Enter password: ";
+        cin >> password;
+        if (user_manager.login_user(username, password)) {
+            cout << "Login successful!\n";
+            user_dashboard(username);
+        }
+        else {
+            cout << "Invalid username or password.\n";
+        }
+    }
+
+    void admin_login() {
+        string username, password;
+        cout << "Enter admin username: ";
+        cin >> username;
+        cout << "Enter admin password: ";
+        cin >> password;
+        if (user_manager.admin_login(username, password)) {
+            cout << "Admin login successful!\n";
+            admin_dashboard();
+        }
+        else {
+            cout << "Invalid admin username or password.\n";
+        }
+    }
+
+    void user_dashboard(const string& username) {
         int choice;
-        while (true) {
-            cout << "               ==============================================================================" << endl;
-            cout << "                                             U S E R   M E N U" << endl;
-            cout << "               ==============================================================================" << endl << endl;
-            cout << "\t\t\t[1]\tView Cart" << endl;
-            cout << "\t\t\t[2]\tAdd to Cart" << endl;
-            cout << "\t\t\t[3]\tView Purchase History" << endl;
-            cout << "\t\t\t[4]\tAdd Money" << endl;
-            cout << "\t\t\t[5]\tExit\n" << endl;
-            cout << "                           =====================================================" << endl;
-            cout << "                                                Enter Mode: ";
+        do {
+            cout << "\nUser Dashboard:\n";
+            cout << "1. View Inventory\n";
+            cout << "2. Add to Cart\n";
+            cout << "3. View Cart\n";
+            cout << "4. Checkout\n";
+            cout << "5. Add Money\n";
+            cout << "6. View Purchase History\n";
+            cout << "7. Logout\n";
+            cout << "Enter your choice: ";
             cin >> choice;
-            system("cls");
 
             switch (choice) {
             case 1:
-                userManager.view_cart(username);
+                inventory_manager.view_inventory(conn.get());
                 break;
             case 2: {
-                string item;
+                string item_name;
                 cout << "Enter item name to add to cart: ";
-                cin >> item;
-                if (inventoryManager.item_exists(item)) {
-                    userManager.add_to_cart(username, item);
-                    cout << "Item added to cart." << endl;
+                cin >> item_name;
+                if (user_manager.add_to_cart(username, item_name)) {
+                    cout << "Item added to cart.\n";
                 }
                 else {
-                    cout << "Item does not exist." << endl;
+                    cout << "Item not found.\n";
                 }
                 break;
             }
             case 3:
-                userManager.view_purchase_history(username);
+                user_manager.view_cart(username);
                 break;
-            case 4: {
+            case 4:
+                checkout(username);
+                break;
+            case 5: {
                 double amount;
                 cout << "Enter amount to add: ";
                 cin >> amount;
-                userManager.add_money(username, amount);
+                user_manager.add_money(username, amount);
+                cout << "Money added successfully.\n";
                 break;
             }
-            case 5:
-                return;
+            case 6:
+                user_manager.view_purchase_history(username);
+                break;
+            case 7:
+                cout << "Logging out...\n";
+                break;
             default:
-                cout << "\t\t\t\t\tInvalid choice. Please try again.\n";
+                cout << "Invalid choice. Try again.\n";
             }
+        } while (choice != 7);
+    }
+
+    void admin_dashboard() {
+        int choice;
+        do {
+            cout << "\nAdmin Dashboard:\n";
+            cout << "1. View Inventory\n";
+            cout << "2. Add Item to Inventory\n";
+            cout << "3. Delete Item from Inventory\n";
+            cout << "4. Restock Item\n";
+            cout << "5. View Purchase History\n";
+            cout << "6. View All Purchase Histories\n";
+            cout << "7. View Total Profit\n";
+            cout << "8. Logout\n";
+            cout << "Enter your choice: ";
+            cin >> choice;
+
+            switch (choice) {
+            case 1:
+                inventory_manager.view_inventory(conn.get());
+                break;
+            case 2: {
+                string item_name;
+                int quantity;
+                double cost_price, sell_price;
+                cout << "Enter item name: ";
+                cin >> item_name;
+                cout << "Enter quantity: ";
+                cin >> quantity;
+                cout << "Enter cost price: ";
+                cin >> cost_price;
+                cout << "Enter selling price: ";
+                cin >> sell_price;
+                inventory_manager.add_item(conn.get(), item_name, quantity, cost_price, sell_price);
+                break;
+            }
+            case 3: {
+                string item_name;
+                cout << "Enter item name to delete: ";
+                cin >> item_name;
+                inventory_manager.delete_item(conn.get(), item_name);
+                break;
+            }
+            case 4: {
+                string item_name;
+                int quantity;
+                cout << "Enter item name to restock: ";
+                cin >> item_name;
+                cout << "Enter quantity: ";
+                cin >> quantity;
+                inventory_manager.restock_item(conn.get(), item_name, quantity);
+                break;
+            }
+            case 5: {
+                string username;
+                cout << "Enter username to view purchase history: ";
+                cin >> username;
+                user_manager.view_purchase_history(username);
+                break;
+            }
+            case 6:
+                user_manager.view_all_purchase_history();
+                break;
+            case 7:
+                cout << "Total Profit: Php" << inventory_manager.get_total_profit() << "\n";
+                break;
+            case 8:
+                cout << "Logging out...\n";
+                break;
+            default:
+                cout << "Invalid choice. Try again.\n";
+            }
+        } while (choice != 8);
+    }
+
+    void checkout(const string& username) {
+        CartNode* current = user_manager.get_cart_head(username);
+        double total_cost = 0.0;
+        while (current) {
+            total_cost += inventory_manager.inventory.at(current->item_name).price;
+            current = current->next;
         }
+
+        if (total_cost > user_manager.get_user_money(username)) {
+            cout << "Insufficient funds.\n";
+            return;
+        }
+
+        current = user_manager.get_cart_head(username);
+        while (current) {
+            const Item& item = inventory_manager.inventory.at(current->item_name);
+            if (item.quantity > 0) {
+                inventory_manager.update_inventory(item.name, 1);
+                inventory_manager.update_profit(item.price - item.cost_price);
+                user_manager.deduct_money(username, item.price);
+                user_manager.add_to_purchase_history(username, item.name, item.price, __DATE__);
+            }
+            else {
+                cout << "Item " << item.name << " is out of stock.\n";
+            }
+            current = current->next;
+        }
+        user_manager.clear_cart(username);
+        cout << "Checkout complete.\n";
     }
 };
 
 int main() {
     Techgear techgear;
-    techgear.introduction();
-    techgear.main_menu();
+    int choice;
+    do {
+        cout << "1. Register\n";
+        cout << "2. User Login\n";
+        cout << "3. Admin Login\n";
+        cout << "4. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1:
+            techgear.register_user();
+            break;
+        case 2:
+            techgear.user_login();
+            break;
+        case 3:
+            techgear.admin_login();
+            break;
+        case 4:
+            cout << "Exiting...\n";
+            break;
+        default:
+            cout << "Invalid choice. Try again.\n";
+        }
+    } while (choice != 4);
+
     return 0;
 }
