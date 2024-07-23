@@ -263,6 +263,8 @@ public:
             cout << "User not found.\n";
             return;
         }
+
+        users[username].purchase_history.clear();
         load_purchase_history(username);
         const auto& history = users.at(username).purchase_history;
 
@@ -705,8 +707,10 @@ public:
                 }
                 case 3: {
                     string spec_key, spec_value;
+                    cin.ignore();
                     cout << "Enter specification key: ";
                     getline(cin, spec_key);
+                    cin.ignore();
                     cout << "Enter specification value: ";
                     getline(cin, spec_value);
                     inventoryManager.search_by_spec(spec_key, spec_value);
