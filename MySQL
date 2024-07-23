@@ -14,13 +14,91 @@
 using namespace std;
 using namespace sql;
 
-class User {
+struct Item {
+    string name;
+    string category;
+    unordered_map<string, string> specs;
+    double price;
+    int quantity;
+    double cost_price;
+
+    Item() : name(""), category(""), price(0.0), quantity(0), cost_price(0.0) {}
+
+    Item(string n, string c, unordered_map<string, string> s, double p, int q, double cp)
+        : name(n), category(c), specs(s), price(p), quantity(q), cost_price(cp) {}
+};
+
+class Cart {
+private:
+    CartNode* head;
+
 public:
+    Cart() : head(nullptr) {}
+
+    ~Cart() {
+        clear_cart();
+    }
+
+    void add_item(const string& item_name) {
+        CartNode* newNode = new CartNode(item_name);
+        newNode->next = head;
+        head = newNode;
+    }
+
+    void view_cart() const {
+        CartNode* current = head;
+        while (current) {
+            cout << "- " << current->item_name << "\n";
+            current = current->next;
+        }
+    }
+
+    double total_cost(const unordered_map<string, Item>& inventory) const {
+        double total = 0.0;
+        CartNode* current = head;
+        while (current) {
+            total += inventory.at(current->item_name).price;
+            current = current->next;
+        }
+        return total;
+    }
+
+    void clear_cart() {
+        while (head) {
+            CartNode* temp = head;
+            head = head->next;
+            delete temp;
+        }
+    }
+
+    CartNode* get_head() const {
+        return head;
+    }
+};
+
+struct CartNode {
+    string item_name;
+    CartNode* next;
+
+    CartNode(string name) : item_name(name), next(nullptr) {}
+};
+
+struct PurchaseRecord {
+    string item_name;
+    double cost;
+    string date;
+
+    PurchaseRecord(const string& item, double c, const string& d) : item_name(item), cost(c), date(d) {}
+};
+
+struct User {
     string username;
     string password;
+    Cart cart;
     double money;
     vector<PurchaseRecord> purchase_history;
-    Cart cart;
+
+    User() : username(""), password(""), money(0.0) {}
 };
 
 class UserManager {
@@ -233,6 +311,9 @@ public:
 
 
 class InventoryManager {
+private:
+    unordered_map<string, Item> inventory;
+    double total_profit;
 public:
     void view_inventory(Connection* conn) {
         try {
@@ -245,6 +326,10 @@ public:
         catch (SQLException& e) {
             cerr << "Error: " << e.what() << endl;
         }
+    }
+
+    void update_inventory(const string& item_name, int quantity) {
+        inventory[item_name].quantity -= quantity;
     }
 
     void add_item(Connection* conn, const string& item_name, int quantity, double price) {
@@ -299,6 +384,19 @@ public:
         }
     }
 
+    void decrease_item_quantity(const string& item_name) {
+        if (inventory.find(item_name) != inventory.end()) {
+            inventory[item_name].quantity--;
+        }
+    }
+
+    Item* get_item(const string& item_name) {
+        if (inventory.find(item_name) == inventory.end()) {
+            return nullptr;
+        }
+        return &inventory[item_name];
+    }
+
     void calculate_total_profit(Connection* conn) {
         try {
             unique_ptr<Statement> stmt(conn->createStatement());
@@ -311,13 +409,60 @@ public:
             cerr << "Error: " << e.what() << endl;
         }
     }
+
+    void display_total_profit() const {
+        double total_profit = calculate_total_profit();
+        cout << "Total Profit: Php" << total_profit << endl;
+    }
+
+    void add_profit(double amount) {
+        total_profit += amount;
+    }
+
+    void update_profit(double amount) {
+        total_profit += amount;
+    }
+
+    double get_total_profit() const {
+        return total_profit;
+    }
+
+    const unordered_map<string, Item>& get_inventory() const {
+        return inventory;
+    }
+
+    bool item_exists(const string& item_name) const {
+        return inventory.find(item_name) != inventory.end();
+    }
+
+    void search_by_spec(const string& spec_key, const string& spec_value) {
+        bool found = false;
+        for (const auto& pair : inventory) {
+            const auto& item = pair.second;
+            if (item.specs.find(spec_key) != item.specs.end() && item.specs.at(spec_key) == spec_value) {
+                cout << "\t\t\tName: " << item.name << endl;
+                cout << "\t\t\tCategory: " << item.category << endl;
+                for (const auto& spec : item.specs) {
+                    cout << spec.first << ": " << spec.second << endl;
+                }
+                cout << "\t\t\tPrice: $" << item.price << endl;
+                cout << "\t\t\tQuantity: " << item.quantity << endl;
+                cout << "                           =====================================================" << endl;
+                found = true;
+            }
+        }
+        if (!found) {
+            cout << "\t\t\t\t\tNo items found with " << spec_key << " = " << spec_value << endl;
+        }
+    }
+
+
 };
 
 class Techgear {
-    InventoryManager inventoryManager;
-    // Assuming UserManager is a class managing user accounts.
-    // Replace it with the actual implementation.
+private: 
     UserManager userManager;
+    InventoryManager inventoryManager;
 
 public:
     void admin_menu() {
