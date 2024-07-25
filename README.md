@@ -2,7 +2,7 @@
 ![cf6fcf14be2cd01dd4923b36445ca632](https://github.com/user-attachments/assets/ed0ed199-02a1-4d59-bdfc-90a5f4805b6f)
 #### <p align="center">TechGear is an online tech shop. It offers easy browsing, inventory management, and smooth checkout, making it ideal for tech-savvy shoppers looking for the latest gadgets.</p>
 
-## Table of Contents
+## ✍️Table of Contents
 -  [1. Project Overview](#proj-obv)
 -  [2. Significance](#sig)
 -  [3. Key Features](#key)
@@ -10,7 +10,7 @@
 -  [5. Contributors](#contrib) 
 
 
-## <a id = "proj-obv"> 🖥 Project Overview </a> <br>
+## <a id = "proj-obv">  🖥 Project Overview </a> <br>
 <b>What is Online Shopping or Online Stores?</b>
 <p>Online shopping is a form of electronic commerce which allows consumers to directly buy goods or services from a seller over the Internet using a web browser or a mobile app. Consumers find a product of interest by visiting the website of the retailer directly or by searching among alternative vendors using a shopping search engine, which displays the same product's availability and pricing at different e-retailers.</p>
 
@@ -21,18 +21,18 @@
 <p>TechGear is your go-to online store for the latest tech gadgets. We offer a seamless shopping experience with easy navigation and a wide selection of products. Whether you're looking for smartphones or laptops. TechGear provides a user-friendly platform to browse and buy your favorite items hassle-free. Explore tech shopping made simple with techGear.</p>
 <br>
 
-##  <a id = "sig"> 🖥 Significance </a><br>
+##  <a id = "sig"> 📌 Significance </a><br>
 - <b> Promoting Digital Literacy and Accessibility</b>: TechGear can help bridge the digital divide by making laptops more accessible to a wider audience. This enhances digital literacy, as more people gain more access to technology and can participate in the digital economy.<br><br>
 - <b>Economic Impact</b>: Creating Online Shopping Applications can stimulate economic growth by creating new business opportunities and potentially generating employment in the tech and retail sectors.<br><br>
 - <b>Technical Skills Development</b>: Developers of TechGear gain experience in software development, teamwork, and project management. These skills are crucial in the tech industry and can lead to further innovations and entrepreneurial ventures.<br><br>
 
-##  <a id = "key"> 🖥 Key Features </a><br>
+##  <a id = "key"> 🖇 Key Features </a><br>
 - <b> User Registration and Authentication</b>: This feature provides our users with a secure and convenient way to access our TechGear App.<br><br>
 - <b>Product Categories</b>: This feature allows users to browse Laptop products by brand, specs, price range, and other attributes.<br><br>
 - <b>Admin Controls</b>: This feature allows for the updating of product information, prices, and promotional offers.<br><br>
 - <b>Search Tool</b>: Offers a powerful search functionality to help users find products quickly.<br><br>
 
-## <a id = "un"> 🖥 How it Contributes to [UN's SDG](https://education.nationalgeographic.org/resource/sustainable-development-goals/ "Sustainable Development Goals")</a><br>
+## <a id = "un"> 💡 How it Contributes to [UN's SDG](https://education.nationalgeographic.org/resource/sustainable-development-goals/ "Sustainable Development Goals")</a><br>
 TechGear contributes to these 5 United Nation's Sustainabe Development Goals (SDG). 
 
 ### [**Quality Education**](https://sdgs.un.org/goals/goal4 "SDG 4: Quality Education")
@@ -50,10 +50,16 @@ Making laptops more accessible through an online shop can help reduce inequaliti
 ### [**Partnerships for the Goals**](https://sdgs.un.org/goals/goal17 "SDG 17: Partnerships for the Goals:")
 This project can foster partnerships with laptop manufacturers, educational institutions, and other stakeholders, promoting collaboration and the sharing of knowledge and resources to achieve common goals.
 
-##  <a id = "contrib"> 🖥‍ Contributors </a> <br>
+##  <a id = "contrib"> 👨‍💻 Contributors </a> <br>
 | Name | Role | E-mail | Other Contacts |
 | --- | --- | --- | --- |
 | <a href = "https://github.com/BrylleFajutnao">Fajutnao, Brylle</a> | Developer | 23-02509@g.batstate-u.edu.ph|   |
 | <a href = "https://github.com/NigelHans">Nunez, Nigel Hans</a>|  Developer  | 23-07848@g.batstate-u.edu.ph |  |
 | <a href = "https://github.com/EdrickaMaePaulos">Paulos, Edricka Mae</a>| Developer | 23-07123@g.batstate-u.edu.ph | |
 | <a href = "https://github.com/FerosC101>">Villar, Vince Anjo</a>| Developer | 23-01484@g.batstate-u.edu.ph | |
+
+<h3> COURSE </h3>
+<p> CS 131 - Data Structures and Algorithm</p>
+<h3> FACILITATOR </h3>
+<p> Ms. Fatima Marie Agdon</p> <br>
+
