@@ -11,7 +11,14 @@
 
 
 ## <a id = "proj-obv"> 🖥 Project Overview </a> <br>
-TechGear is your go-to online store for the latest tech gadgets. We offer a seamless shopping experience with easy navigation and a wide selection of products. Whether you're looking for smartphones or laptops. TechGear provides a user-friendly platform to browse and buy your favorite items hassle-free. Explore tech shopping made simple with techGear.
+<b>What is Online Shopping or Online Stores?</b>
+<p>Online shopping is a form of electronic commerce which allows consumers to directly buy goods or services from a seller over the Internet using a web browser or a mobile app. Consumers find a product of interest by visiting the website of the retailer directly or by searching among alternative vendors using a shopping search engine, which displays the same product's availability and pricing at different e-retailers.</p>
+
+<b>What is Ecommerce?</b>
+<p>E-commerce (electronic commerce) is the activity of electronically buying or selling products on online services or over the Internet. E-commerce draws on technologies such as mobile commerce, electronic funds transfer, supply chain management, Internet marketing, online transaction processing, electronic data interchange (EDI), inventory management systems, and automated data collection systems.</p>
+
+<b>What is TechGear?</b>
+<p>TechGear is your go-to online store for the latest tech gadgets. We offer a seamless shopping experience with easy navigation and a wide selection of products. Whether you're looking for smartphones or laptops. TechGear provides a user-friendly platform to browse and buy your favorite items hassle-free. Explore tech shopping made simple with techGear.</p>
 <br>
 
 ##  <a id = "sig"> 🖥 Significance </a><br>
