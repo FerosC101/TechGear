@@ -33,7 +33,7 @@
 - <b>Search Tool</b>: Offers a powerful search functionality to help users find products quickly.<br><br>
 
 ## <a id = "un"> 🖥 How it Contributes to [UN's SDG](https://education.nationalgeographic.org/resource/sustainable-development-goals/ "Sustainable Development Goals")</a><br>
-TechGear contributes to these 4 United Nation's Sustainabe Development Goals (SDG). 
+TechGear contributes to these 5 United Nation's Sustainabe Development Goals (SDG). 
 
 ### [**Quality Education**](https://sdgs.un.org/goals/goal4 "SDG 4: Quality Education")
 By increasing access to Gadgets, TechGear supports educational initiatives. Gadgets are essential tools for modern education, enabling students to access online resources, participate in virtual classrooms, and develop digital skills.
