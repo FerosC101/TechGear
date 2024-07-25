@@ -6,8 +6,8 @@
 #include <ctime>
 #include <cstdlib>
 #include <set>
-#include <map>
-#include <iomanip>
+#include <limits>
+
 using namespace std;
 
 struct Item {
@@ -130,7 +130,7 @@ private:
     }
 
     void save_purchase_history(const string& username) {
-        ofstream file(username + "history.txt",ios::app);
+        ofstream file(username + "history.txt",ios::trunc);
         if (file.is_open()) {
             for (const auto& record : users[username].purchase_history) {
                 file << "\"" << record.item_name << "\" " << record.cost << " " << record.date << "\n";
@@ -293,7 +293,7 @@ public:
             if (!history.empty()) {
                 cout << "\t\t\t" << username << "'s Purchase History: \n";
                 for (const auto& record : history) {
-                    cout << "Item: " << record.item_name << ", Cost: Php" << record.cost << ", Date: " << record.date << "\n";
+                    cout << "\t\t\t\tItem: " << record.item_name << ", Cost: Php" << record.cost << ", Date: " << record.date << "\n";
                 }
                 hasHistory = true;
             }
@@ -502,8 +502,14 @@ public:
             cout << "\t\t\t[7]\tExit\n" << endl;
 			cout << "                           =====================================================" << endl;
 			cout << "                                                Enter Mode: ";
-            cin >> choice;
+            while (!(cin >> choice) || choice < 1 || choice > 7) {
+                cout << "Invalid choice, please enter a valid option(1-7): ";
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            }
             system("cls");
+
+            
 
             switch(choice) {
                 case 1:
@@ -520,21 +526,25 @@ public:
                     cout << "               ==============================================================================" << endl;
                     cout << "                                                  A D D   I T E M S" << endl;
 			        cout << "               ==============================================================================" << endl << endl;
-                    cout << "\t\t\tEnter item name\t\t\t\t: ";
-                    cin >> name;
-                    cout << "\t\t\tEnter category\t\t\t\t: ";
+                    cin.ignore();
+                    cout << "\t\t\tEnter item name\t\t\t\t\t: ";
+                    getline(cin, name);
+                    cout << "\t\t\tEnter category\t\t\t\t\t: ";
                     cin >> category;
-                    cout << "\t\t\tEnter price\t\t\t\t: ";
+                    cout << "\t\t\tEnter price\t\t\t\t\t: ";
                     cin >> price;
-                    cout << "\t\t\tEnter quantity\t\t\t\t: ";
+                    cout << "\t\t\tEnter quantity\t\t\t\t\t: ";
                     cin >> quantity;
                     cout << "\t\t\tEnter cost price\t\t\t\t: ";
                     cin >> cost_price;
-                    cout << "\t\t\tEnter specs (key value pairs, 'done' to finish)\t:\n";
+                    cout << "\t\t\tEnter specs (key value pairs, 'done' to finish. Double Enter for new specs entry:>)\t:\n";
                     while (true) {
-                        cin >> spec_key;
+                        cin.ignore();
+                        cout << "\t\t\t\tEnter Specs Key\t\t\t\t: ";
+                        getline(cin, spec_key);
                         if (spec_key == "done") break;
-                        cin >> spec_value;
+                        cout << "\t\t\t\tEnter Specs Value\t\t\t: ";
+                        getline(cin, spec_value);
                         specs[spec_key] = spec_value;
                     }
 
@@ -552,8 +562,9 @@ public:
                     cout << "               ==============================================================================" << endl;
                     cout << "                                                E D I T   P R I C E" << endl;
 			        cout << "               ==============================================================================" << endl << endl;
+                    cin.ignore();
                     cout << "\t\t\tEnter item name\t\t: ";
-                    cin >> item_name;
+                    getline(cin, item_name);
                     cout << "\t\t\tEnter new price\t\t: ";
                     cin >> new_price;
                     if (inventoryManager.edit_price(item_name, new_price)) {
@@ -569,8 +580,9 @@ public:
                     cout << "               ==============================================================================" << endl;
                         cout << "                                         E D I T   Q U A N T I T Y " << endl;
 			        cout << "               ==============================================================================" << endl << endl;
+                    cin.ignore();
                     cout << "\t\t\tEnter item name\t\t: ";
-                    cin >> item_name;
+                    getline(cin, item_name);
                     cout << "\t\t\tEnter new quantity\t\t: ";
                     cin >> new_quantity;
                     if (inventoryManager.edit_quantity(item_name, new_quantity)) {
@@ -582,13 +594,17 @@ public:
                 }
                 case 5: {
                     string item_name;
-                    cout << "Enter item name: ";
-                    cin >> item_name;
+                    cout << "               ==============================================================================" << endl;
+                        cout << "                                         D E L E T E   I T E M " << endl;
+			        cout << "               ==============================================================================" << endl << endl;
+                    cin.ignore();
+                    cout << "\t\t\tEnter item name\t\t\t: ";
+                    getline(cin, item_name);
 
                     if (inventoryManager.delete_item(item_name)) {
-                        cout << "Item deleted successfully.\n";
+                        cout << "\t\t\t\t\tItem deleted successfully.\n";
                     } else {
-                        cout << "Item not found.\n";
+                        cout << "\t\t\t\t\tItem not found.\n";
                     }
                     break;
 
@@ -597,7 +613,7 @@ public:
                     cout << "               ==============================================================================" << endl;
                     cout << "                                                P R O F I T" << endl;
 			        cout << "               ==============================================================================" << endl << endl;
-                    cout << "\t\t\tTotal profit: $" << inventoryManager.calculate_total_profit() << "\n";
+                    cout << "\t\t\tTotal profit: Php " << inventoryManager.calculate_total_profit() << "\n";
                     userManager.view_all_purchase_history();
                     break;
                 case 7:
@@ -687,9 +703,9 @@ public:
                     if (!date.empty() && date.back() == '\n') {
                         date.pop_back(); 
                     }
-                    cout << "Checkout successful. Total cost: Php" << total_cost << "\n";
+                    cout << "\t\t\tCheckout successful. Total cost: Php" << total_cost << "\n";
                 } else {
-                    cout << "Insufficient funds. Please add more money to your account.\n";
+                    cout << "\t\t\tInsufficient funds. Please add more money to your account.\n";
                 }
                 break;
             } else {
@@ -715,8 +731,14 @@ public:
 	        cout << "\t\t\t[6]\tExit\n" << endl;
 	        cout << "                           =====================================================" << endl;
 	        cout << "                                                Enter Choice: ";
-            cin >> choice;
+            while (!(cin >> choice) || choice < 1 || choice > 9) {
+                cout << "Invalid choice, please enter a valid option(1-6): ";
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            }
             system("cls");
+
+           
 
             switch (choice) {
                 case 1:
@@ -735,16 +757,21 @@ public:
                 cout << "\t\t\t[2]\tSearch by Specifications" << endl;
                 cout << "              ====================================" << endl;
                 cout << "                      Enter Choice: ";
-                cin >> searchChoice;
-                cin.ignore();
+                while (!(cin >> searchChoice) || searchChoice < 1 || searchChoice > 2) {
+                    cout << "Invalid choice, please enter a valid option(1-2): ";
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                }
 
                 if (searchChoice == 1) {
                     string name;
+                    cin.ignore();
                     cout << "Enter the name of the item: ";
                     getline(cin, name);
                     inventoryManager.search_by_name(name);
                 } else if (searchChoice == 2) {
                     string spec_key, spec_value;
+                    cin.ignore();
                     cout << "Enter specification key: ";
                     getline(cin, spec_key);
                     cout << "Enter specification value: ";
@@ -826,8 +853,14 @@ public:
 	        cout << "                           =====================================================" << endl;
 	        cout << endl << endl;
 	        cout << "                                                Enter Mode: ";
-            cin >> choice;
+            while (!(cin >> choice) || choice < 1 || choice > 4) {
+                cout << "Invalid choice, please enter a valid option(1-4): ";
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            }
             system("cls");
+
+            
 
             switch (choice) {
                 case 1:
@@ -873,7 +906,7 @@ public:
                     }
                     break;
                 case 4:
-                    return;
+                    exit(0);
                 default:
                     cout << "\t\t\t\t\tInvalid choice. Please try again.\n";
             }
