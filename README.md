@@ -5,10 +5,9 @@
 ## Table of Contents
 -  [1. Project Overview](#proj-obv)
 -  [2. Significance](#sig)
--  [3. Database Management](#db)
--  [4. Key Features](#key)
--  [5. How it Contributes to UN's SDG](#un) 
--  [6. Contributors](#contrib) 
+-  [3. Key Features](#key)
+-  [4. How it Contributes to UN's SDG](#un) 
+-  [5. Contributors](#contrib) 
 
 
 ## <a id = "proj-obv"> 🖥 Project Overview </a> <br>
@@ -19,16 +18,6 @@ TechGear is your go-to online store for the latest tech gadgets. We offer a seam
 - <b> Promoting Digital Literacy and Accessibility</b>: TechGear can help bridge the digital divide by making laptops more accessible to a wider audience. This enhances digital literacy, as more people gain more access to technology and can participate in the digital economy.<br><br>
 - <b>Economic Impact</b>: Creating Online Shopping Applications can stimulate economic growth by creating new business opportunities and potentially generating employment in the tech and retail sectors.<br><br>
 - <b>Technical Skills Development</b>: Developers of TechGear gain experience in software development, teamwork, and project management. These skills are crucial in the tech industry and can lead to further innovations and entrepreneurial ventures.<br><br>
-
-## <span style="color: black;" id="db"> 🖥 Database Management System </span><br>
-<b>Choice of Database System </b><br>
-The project utilizes MySQL as its database management system. The decision to use MySQL was based on several factors, including:
-- <b>Open Source</b>: MySQL is open-source software, which means it is freely available and has a large community of developers contributing to its improvement and support.
-<br><br>
-- <b>Performance</b>: MySQL is known for its high performance, efficiency, and speed in executing queries, making it a reliable choice for applications that require quick data retrieval and processing.
-<br><br>
-- <b>Reliability</b>: MySQL has a proven track record of being stable and reliable. It has robust data protection features, transaction support, and ensures data integrity, which are crucial for business-critical applications.
-<br><br>
 
 ##  <a id = "key"> 🖥 Key Features </a><br>
 - <b> User Registration and Authentication</b>: This feature provides our users with a secure and convenient way to access our TechGear App.<br><br>
@@ -57,7 +46,7 @@ This project can foster partnerships with laptop manufacturers, educational inst
 ##  <a id = "contrib"> 🖥‍ Contributors </a> <br>
 | Name | Role | E-mail | Other Contacts |
 | --- | --- | --- | --- |
-| <a href = "https://github.com/DanielleZiac">Fajutnao, Brylle</a> | Developer | 23-02509@g.batstate-u.edu.ph|   |
-| <a href = "https://github.com/LanceAndrei04">Nunez, Nigel Hans</a>|  Developer  | 23-07848@g.batstate-u.edu.ph |  |
-| <a href = "https://github.com/AeronEvangelista">Paulos, Edricka Mae</a>| Developer | 23-07123@g.batstate-u.edu.ph | |
-| <a href = "https://github.com/T>">Villar, Vince Anjo</a>| Developer | 23-01484@g.batstate-u.edu.ph | |
+| <a href = "https://github.com/BrylleFajutnao">Fajutnao, Brylle</a> | Developer | 23-02509@g.batstate-u.edu.ph|   |
+| <a href = "https://github.com/NigelHans">Nunez, Nigel Hans</a>|  Developer  | 23-07848@g.batstate-u.edu.ph |  |
+| <a href = "https://github.com/EdrickaMaePaulos">Paulos, Edricka Mae</a>| Developer | 23-07123@g.batstate-u.edu.ph | |
+| <a href = "https://github.com/FerosC101>">Villar, Vince Anjo</a>| Developer | 23-01484@g.batstate-u.edu.ph | |
