@@ -51,7 +51,7 @@ public:
     void view_cart() const {
         CartNode* current = head;
         while (current) {
-            cout << "- " << current->item_name << "\n";
+            cout << "\t\t\t- " << current->item_name << "\n";
             current = current->next;
         }
     }
@@ -137,7 +137,7 @@ private:
             }
             file.close();
         } else {
-            cerr << "Error: Could not open file for user: " << username << endl;
+            cerr << "\t\t\tError: Could not open file for user: " << username << endl;
         }
     }
 
@@ -213,7 +213,7 @@ public:
     }
 
     void view_cart(const string& username) {
-        cout << username << "'s Cart:\n";
+        cout <<"\t\t\t" << username << "'s Cart:\n";
         users[username].cart.view_cart();
     }
 
@@ -254,13 +254,13 @@ public:
             users[username].purchase_history.emplace_back(item_name, cost, date);
             save_purchase_history(username);
         } else {
-            cerr << "Error: User " << username << " not found." << endl;
+            cerr << "\t\t\t\tError: User " << username << " not found." << endl;
         }
     }
 
     void view_purchase_history(const string& username) {
         if (users.find(username) == users.end()) {
-            cout << "User not found.\n";
+            cout << "\t\t\t\t\tUser not found.\n";
             return;
         }
 
@@ -344,17 +344,19 @@ public:
     }
 
     void view_inventory() {
-        cout << "\t\t\tInventory:\n";
+        cout << "               ==============================================================================" << endl;
+        cout << "                                               I N V E N T O R Y" << endl;
+	cout << "               ==============================================================================" << endl << endl;
         for (const auto& pair : inventory) {
             const auto& item = pair.second;
-            cout << "\t\t\tName\t\t: " << item.name << endl;
-            cout << "\t\t\tCategory\t: " << item.category << endl;
+            cout << "\t\t\tName\t\t\t: " << item.name << endl;
+            cout << "\t\t\tCategory\t\t: " << item.category << endl;
             for (const auto& spec : item.specs) {
-                cout << spec.first << ": " << spec.second << endl;
+                cout << "\t\t\t"<< spec.first << "\t\t\t: " << spec.second << endl;
             }
-            cout << "\t\t\tPrice: Php" << item.price << endl;
-            cout << "\t\t\tQuantity: " << item.quantity << endl;
-            cout << "--------------------------------" << endl;
+            cout << "\t\t\tPrice\t\t\t: Php" << item.price << endl;
+            cout << "\t\t\tQuantity\t\t: " << item.quantity << endl;
+		cout << "               ==============================================================================" << endl;
         }
     }
 
@@ -415,7 +417,7 @@ public:
 
     void display_total_profit() const {
         double total_profit = calculate_total_profit();
-        cout << "Total Profit: Php" << total_profit << endl;
+        cout << "\t\t\tTotal Profit: Php" << total_profit << endl;
     }
 
     void add_profit(double amount) {
@@ -443,14 +445,14 @@ public:
     for (const auto& pair : inventory) {
         const auto& item = pair.second;
         if (item.specs.find(spec_key) != item.specs.end() && item.specs.at(spec_key) == spec_value) {
-            cout << "\t\t\tName: " << item.name << endl;
-            cout << "\t\t\tCategory: " << item.category << endl;
+            cout << "\t\t\tName\t\t: " << item.name << endl;
+            cout << "\t\t\tCategory\t: " << item.category << endl;
             for (const auto& spec : item.specs) {
-                cout << spec.first << ": " << spec.second << endl;
+                cout << "\t\t\t"<<spec.first << "\t: " << spec.second << endl;
             }
-            cout << "\t\t\tPrice: $" << item.price << endl;
-            cout << "\t\t\tQuantity: " << item.quantity << endl;
-            cout << "                           =====================================================" << endl;
+            cout << "\t\t\tPrice\t\t: Php" << item.price << endl;
+            cout << "\t\t\tQuantity\t: " << item.quantity << endl;
+            cout << "               ==============================================================================" << endl<< endl;
             found = true;
         }
     }
@@ -464,14 +466,14 @@ public:
         for (const auto& pair : inventory) {
             const auto& item = pair.second;
             if (item.name == name) {
-                cout << "\t\t\tName: " << item.name << endl;
-                cout << "\t\t\tCategory: " << item.category << endl;
+                cout << "\t\t\tName\t: " << item.name << endl;
+                cout << "\t\t\tCategory\t\t: " << item.category << endl;
                 for (const auto& spec : item.specs) {
-                    cout << spec.first << ": " << spec.second << endl;
+                    cout << "\t\t\t"<<spec.first << "\t: " << spec.second << endl;
                 }
-                cout << "\t\t\tPrice: $" << item.price << endl;
-                cout << "\t\t\tQuantity: " << item.quantity << endl;
-                cout << "                           =====================================================" << endl;
+                cout << "\t\t\tPrice\t\t: Php" << item.price << endl;
+                cout << "\t\t\tQuantity\t: " << item.quantity << endl;
+                cout << "               ==============================================================================" << endl << endl;
                 found = true;
             }
         }
@@ -500,8 +502,8 @@ public:
             cout << "\t\t\t[5]\tDelete Item" << endl;
             cout << "\t\t\t[6]\tCalculate Total Profit" << endl;
             cout << "\t\t\t[7]\tExit\n" << endl;
-			cout << "                           =====================================================" << endl;
-			cout << "                                                Enter Mode: ";
+		cout << "               ==============================================================================" << endl;
+		cout << "                                                Enter Mode: ";
             while (!(cin >> choice) || choice < 1 || choice > 7) {
                 cout << "Invalid choice, please enter a valid option(1-7): ";
                 cin.clear();
@@ -525,7 +527,7 @@ public:
                     int quantity;
                     cout << "               ==============================================================================" << endl;
                     cout << "                                                  A D D   I T E M S" << endl;
-			        cout << "               ==============================================================================" << endl << endl;
+			cout << "               ==============================================================================" << endl << endl;
                     cin.ignore();
                     cout << "\t\t\tEnter item name\t\t\t\t\t: ";
                     getline(cin, name);
@@ -595,8 +597,8 @@ public:
                 case 5: {
                     string item_name;
                     cout << "               ==============================================================================" << endl;
-                        cout << "                                         D E L E T E   I T E M " << endl;
-			        cout << "               ==============================================================================" << endl << endl;
+			cout << "                                         D E L E T E   I T E M " << endl;
+			cout << "               ==============================================================================" << endl << endl;
                     cin.ignore();
                     cout << "\t\t\tEnter item name\t\t\t: ";
                     getline(cin, item_name);
@@ -628,25 +630,27 @@ public:
 
     void view_inventory_and_add_to_cart(const string& username) {
         while (true) {
-            cout << "\nInventory: \n";
+            cout << "               ==============================================================================" << endl;
+		cout << "                                               I N V E N T O R Y" << endl;
+		cout << "               ==============================================================================" << endl << endl;
             inventoryManager.view_inventory();
-            cout << "\nDo you want an item to the cart? (y/n): ";
+            cout << "\n\t\t\tDo you want an item to the cart? (y/n)\t\t: ";
             char add_to_cart_choice;
             cin >> add_to_cart_choice;
 
             if (add_to_cart_choice == 'y' || add_to_cart_choice == 'Y') {
                 cin.ignore();
                 string item_name;
-                cout << "Enter item name: ";
+                cout << "\t\t\tEnter item name\t\t\t\t\t: ";
                 getline(cin, item_name);
 
                 if (inventoryManager.get_item(item_name)) {
                     userManager.add_to_cart(username, item_name);
-                    cout << "Item added to Cart.\n";
+                    cout << "\t\t\t\t\tItem added to Cart." << endl << endl;
                 } else {
-                    cout << "Item does not exist, Item not found.\n";
+                    cout << "\t\t\t\tItem does not exist, Item not found." << endl << endl;
                 }
-                cout << "Do you want to purchase another item or go to the user menu? (p/u): ";
+                cout << "\t\t\tDo you want to purchase another item or go to the user menu? (p/u): ";
                 char next_choice;
                 cin >> next_choice;
 
@@ -661,12 +665,14 @@ public:
 
     void view_cart_and_checkout(const string& username) {
         while (true) {
-            cout << "\nYour Cart:\n";
+            cout << "               ==============================================================================" << endl;
+                cout << "                                               C A R T" << endl;
+		cout << "               ==============================================================================" << endl << endl;
             userManager.view_cart(username);
             double total_cost = userManager.get_cart(username).total_cost(inventoryManager.get_inventory());
-            cout << "Total Cost: Php" << total_cost << "\n";
+            cout << "\t\t\tTotal Cost\t\t: Php" << total_cost << "\n";
 
-            cout << "Do you want to checkout or return to the menu? (c/m): ";
+            cout << "\t\t\tDo you want to checkout or return to the menu? (c/m)\t: ";
             char checkout_choice;
             cin >> checkout_choice;
 
@@ -714,9 +720,6 @@ public:
         }
     }
 
-
-
-
     void user_menu(const string& username) {
         int choice;
         while (true) {
@@ -729,10 +732,10 @@ public:
 	        cout << "\t\t\t[4]\tAdd Money to Account" << endl;
             cout << "\t\t\t[5]\tAccount Details" << endl;
 	        cout << "\t\t\t[6]\tExit\n" << endl;
-	        cout << "                           =====================================================" << endl;
+	        cout << "               ==============================================================================" << endl;
 	        cout << "                                                Enter Choice: ";
-            while (!(cin >> choice) || choice < 1 || choice > 9) {
-                cout << "Invalid choice, please enter a valid option(1-6): ";
+            while (!(cin >> choice) || choice < 1 || choice > 7) {
+                cout << "\t\t\tInvalid choice, please enter a valid option(1-6): ";
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
             }
@@ -750,15 +753,16 @@ public:
                 }
                 case 3: {
                 int searchChoice;
-                cout << "              ====================================" << endl;
-                cout << "                           Search Menu" << endl;
-                cout << "              ====================================" << endl;
-                cout << "\t\t\t[1]\tSearch by Name" << endl;
-                cout << "\t\t\t[2]\tSearch by Specifications" << endl;
-                cout << "              ====================================" << endl;
-                cout << "                      Enter Choice: ";
+                cout << "               ==============================================================================" << endl;
+                cout << "                                               S E A R C H" << endl;
+		cout << "               ==============================================================================" << endl << endl;
+                cout << "\t\t\t[1]\t\tSearch by Name" << endl;
+                cout << "\t\t\t[2]\t\tSearch by Specifications" << endl;
+                cout << "\t\t\t[3]\t\tReturn" << endl;
+		cout << "               ==============================================================================" << endl;
+                cout << "                                             Enter Choice: ";
                 while (!(cin >> searchChoice) || searchChoice < 1 || searchChoice > 2) {
-                    cout << "Invalid choice, please enter a valid option(1-2): ";
+                    cout << "\t\t\t\tInvalid choice, please enter a valid option(1-2): ";
                     cin.clear();
                     cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 }
@@ -766,41 +770,49 @@ public:
                 if (searchChoice == 1) {
                     string name;
                     cin.ignore();
-                    cout << "Enter the name of the item: ";
+                    cout << "\t\t\tEnter the name of the item\t\t: ";
                     getline(cin, name);
                     inventoryManager.search_by_name(name);
-                } else if (searchChoice == 2) {
+                } 
+		else if (searchChoice == 2) {
                     string spec_key, spec_value;
                     cin.ignore();
-                    cout << "Enter specification key: ";
+                    cout << "\t\t\tEnter specification key\t\t: ";
                     getline(cin, spec_key);
-                    cout << "Enter specification value: ";
+                    cout << "\t\t\tEnter specification value\t\t: ";
                     getline(cin, spec_value);
-                    inventoryManager.search_by_spec(spec_key, spec_value);
-                } else {
-                    cout << "Invalid choice. Please try again." << endl;
+                    inventoryManager.search_by_spec(spec_key, spec_value);	
+                } 
+		else if (searchChoice == 3) {
+			user_menu(username);
+		}
+		else {
+                    cout << "\t\t\t\t\tInvalid choice. Please try again." << endl << endl;
                 }
                 break;
             }
                 case 4: {
                     double amount;
-                    cout << "Enter amount to add: ";
+			cout << "               ==============================================================================" << endl;
+               		cout << "                                               D E P O S I T" << endl;
+			cout << "               ==============================================================================" << endl << endl;
+                    cout << "\t\t\tEnter amount to add\t\t: ";
                     cin >> amount;
                     userManager.add_money(username, amount);
-                    cout << "Php" << amount << " added to your account.\n";
+                    cout << endl << "\t\t\t\tPhp" << amount << " added to your account." << endl << endl;
                     break;
                 }
                 case 5: {
                     cout << "\n               ==============================================================================" << endl;
-                    cout << "                                          A c c o u n t  D e t a i l s" << endl;
+                    cout << "                                          A C C O U N T   D E T A I L S" << endl;
                     cout << "               ==============================================================================" << endl;
-                    cout << "\n\t\t\tUsername: " << username << endl;
-                    cout << "\t\t\tMoney: Php" << userManager.get_user_money(username) << endl;
-                    cout << "\t\t\tPurchase History:" << endl;
+                    cout << "\n\t\t\tUsername\t\t\t: " << username << endl;
+                    cout << "\t\t\tMoney\t\t\t\t: Php" << userManager.get_user_money(username) << endl;
+                    cout << "\t\t\tPurchase History\t\t:" << endl;
                     userManager.view_purchase_history(username);
                     while (true) {
                         char choice;
-                        cout << "\t\t\tEnter M to return to Menu: ";
+                        cout << endl << "\t\t\tEnter M to return to Menu\t\t: ";
                         cin >> choice;
                         if (choice == 'm' || choice == 'M') {
                             user_menu(username);
@@ -810,11 +822,12 @@ public:
                     break;
                 }
                 case 6: {
-                    cout << "Logged out Successfully.\n";
+                    cout << "\t\t\t\t\tLogged out Successfully.\n";
                     main_menu();
+			system("cls");
                 }
                 default:
-                    cout << "Invalid choice. Please try again.\n";
+                    cout << "\t\t\t\t\tInvalid choice. Please try again.\n";
             }
         }
     }
@@ -845,16 +858,16 @@ public:
         string username, password;
 
         while (true) {
-            cout << "                           =====================================================" << endl;
+            cout << "               ==============================================================================" << endl;
 	        cout << "                                               [1] Admin Log-in " << endl;
 	        cout << "                                               [2] User Log-in " << endl;
 	        cout << "                                               [3] Register " << endl;
-	        cout << "                                               [4] Exit " << endl;
-	        cout << "                           =====================================================" << endl;
+		cout << "                                               [4] Exit " << endl;
+	     cout << "               ==============================================================================" << endl;
 	        cout << endl << endl;
 	        cout << "                                                Enter Mode: ";
             while (!(cin >> choice) || choice < 1 || choice > 4) {
-                cout << "Invalid choice, please enter a valid option(1-4): ";
+                cout << "\t\t\t\tInvalid choice, please enter a valid option(1-4): ";
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
             }
