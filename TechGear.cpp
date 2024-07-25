@@ -758,7 +758,6 @@ public:
 		cout << "               ==============================================================================" << endl << endl;
                 cout << "\t\t\t[1]\t\tSearch by Name" << endl;
                 cout << "\t\t\t[2]\t\tSearch by Specifications" << endl;
-                cout << "\t\t\t[3]\t\tReturn" << endl;
 		cout << "               ==============================================================================" << endl;
                 cout << "                                             Enter Choice: ";
                 while (!(cin >> searchChoice) || searchChoice < 1 || searchChoice > 2) {
